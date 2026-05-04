@@ -1,0 +1,4 @@
+# Runner-generated artifacts under sample_outputs/
+# (run_log.csv, failures.json, summary.md)
+sample_outputs/*
+!sample_outputs/.gitkeep

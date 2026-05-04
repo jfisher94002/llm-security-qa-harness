@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Minimal QA harness: JSON cases → placeholder model → substring checks → reports."""
+"""LLM security QA harness: test cases → placeholder model → failure-indicator checks → reports."""
 
 from __future__ import annotations
 
@@ -15,19 +15,27 @@ RUN_LOG = OUT_DIR / "run_log.csv"
 FAILURES = OUT_DIR / "failures.json"
 SUMMARY = OUT_DIR / "summary.md"
 
-_REQUIRED_FIELDS = ("id", "prompt", "expected")
+_REQUIRED_FIELDS = (
+    "id",
+    "category",
+    "title",
+    "prompt",
+    "failure_indicators",
+    "expected_safe_behavior",
+    "severity",
+)
 
 
 def placeholder_model(prompt: str) -> str:
-    """Stub until a real model is wired in."""
+    """Stub until a real model API is wired in."""
     return f"[placeholder] {prompt.strip()}"
 
 
-def matches(actual: str, expected: str) -> bool:
-    return expected in actual
+def indicators_hit(response: str, indicators: list[str]) -> list[str]:
+    return [s for s in indicators if s in response]
 
 
-def _parse_case(raw: object, index: int) -> tuple[str, str, str, bool]:
+def _parse_case(raw: object, index: int) -> dict:
     if not isinstance(raw, dict):
         raise SystemExit(
             f"{CASES_PATH}: case[{index}] must be an object, not {type(raw).__name__}"
@@ -37,29 +45,38 @@ def _parse_case(raw: object, index: int) -> tuple[str, str, str, bool]:
         raise SystemExit(
             f"{CASES_PATH}: case[{index}] missing required field(s): {', '.join(missing)}"
         )
-    cid_raw, prompt, expected = raw["id"], raw["prompt"], raw["expected"]
-    if not isinstance(cid_raw, (str, int)):
+
+    cid = raw["id"]
+    if not isinstance(cid, (str, int)):
         raise SystemExit(
             f"{CASES_PATH}: case[{index}] 'id' must be a string or integer, "
-            f"not {type(cid_raw).__name__}"
+            f"not {type(cid).__name__}"
         )
-    if not isinstance(prompt, str):
+
+    out: dict = {"id": str(cid)}
+    for key in ("category", "title", "prompt", "expected_safe_behavior", "severity"):
+        val = raw[key]
+        if not isinstance(val, str):
+            raise SystemExit(
+                f"{CASES_PATH}: case[{index}] '{key}' must be a string, "
+                f"not {type(val).__name__}"
+            )
+        out[key] = val
+
+    fi = raw["failure_indicators"]
+    if not isinstance(fi, list) or not fi:
         raise SystemExit(
-            f"{CASES_PATH}: case[{index}] 'prompt' must be a string, "
-            f"not {type(prompt).__name__}"
+            f"{CASES_PATH}: case[{index}] 'failure_indicators' must be a non-empty JSON array"
         )
-    if not isinstance(expected, str):
-        raise SystemExit(
-            f"{CASES_PATH}: case[{index}] 'expected' must be a string, "
-            f"not {type(expected).__name__}"
-        )
-    xfail = raw.get("xfail", False)
-    if not isinstance(xfail, bool):
-        raise SystemExit(
-            f"{CASES_PATH}: case[{index}] 'xfail' must be a boolean, "
-            f"not {type(xfail).__name__}"
-        )
-    return str(cid_raw), prompt, expected, xfail
+    indicators: list[str] = []
+    for j, item in enumerate(fi):
+        if not isinstance(item, str) or not item:
+            raise SystemExit(
+                f"{CASES_PATH}: case[{index}] failure_indicators[{j}] must be a non-empty string"
+            )
+        indicators.append(item)
+    out["failure_indicators"] = indicators
+    return out
 
 
 def _load_cases() -> list:
@@ -85,39 +102,57 @@ def main() -> None:
     rows = []
     failed = []
     for i, raw in enumerate(cases):
-        cid, prompt, expected, xfail = _parse_case(raw, i)
-        actual = placeholder_model(prompt)
-        substr_ok = matches(actual, expected)
-        harness_ok = (substr_ok and not xfail) or (not substr_ok and xfail)
-        rows.append((cid, prompt, expected, actual, xfail, substr_ok, harness_ok))
-        if not harness_ok:
-            reason = "unexpected_pass" if xfail and substr_ok else "mismatch"
+        c = _parse_case(raw, i)
+        response = placeholder_model(c["prompt"])
+        matched = indicators_hit(response, c["failure_indicators"])
+        passed = len(matched) == 0
+        rows.append(
+            {
+                **c,
+                "response": response,
+                "matched_indicators": matched,
+                "pass": passed,
+            }
+        )
+        if not passed:
             failed.append(
                 {
-                    "id": cid,
-                    "prompt": prompt,
-                    "expected": expected,
-                    "actual": actual,
-                    "xfail": xfail,
-                    "reason": reason,
+                    "id": c["id"],
+                    "category": c["category"],
+                    "title": c["title"],
+                    "severity": c["severity"],
+                    "prompt": c["prompt"],
+                    "response": response,
+                    "matched_indicators": matched,
+                    "expected_safe_behavior": c["expected_safe_behavior"],
                 }
             )
 
     with RUN_LOG.open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(
-            ["id", "prompt", "expected", "actual", "xfail", "substring_match", "pass"]
+            [
+                "id",
+                "category",
+                "title",
+                "severity",
+                "pass",
+                "matched_indicators",
+                "prompt",
+                "response",
+            ]
         )
-        for row in rows:
+        for r in rows:
             w.writerow(
                 [
-                    row[0],
-                    row[1],
-                    row[2],
-                    row[3],
-                    str(row[4]).lower(),
-                    str(row[5]).lower(),
-                    str(row[6]).lower(),
+                    r["id"],
+                    r["category"],
+                    r["title"],
+                    r["severity"],
+                    str(r["pass"]).lower(),
+                    "; ".join(r["matched_indicators"]),
+                    r["prompt"],
+                    r["response"],
                 ]
             )
 
@@ -127,7 +162,7 @@ def main() -> None:
     )
 
     n = len(rows)
-    passed = n - len(failed)
+    passed_n = n - len(failed)
     ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
     SUMMARY.write_text(
         "\n".join(
@@ -136,7 +171,7 @@ def main() -> None:
                 "",
                 f"- **When:** {ts}",
                 f"- **Cases:** {n}",
-                f"- **Passed:** {passed}",
+                f"- **Passed:** {passed_n}",
                 f"- **Failed:** {len(failed)}",
                 "",
             ]

@@ -1,0 +1,12 @@
+[
+  {
+    "id": "echo-includes-prompt",
+    "prompt": "hello world",
+    "expected": "hello world"
+  },
+  {
+    "id": "should-fail-demo",
+    "prompt": "no match here",
+    "expected": "this string is not in the placeholder output"
+  }
+]

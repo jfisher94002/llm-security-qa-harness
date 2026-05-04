@@ -32,7 +32,8 @@ def placeholder_model(prompt: str) -> str:
 
 
 def indicators_hit(response: str, indicators: list[str]) -> list[str]:
-    return [s for s in indicators if s in response]
+    response_lower = response.lower()
+    return [s for s in indicators if s.lower() in response_lower]
 
 
 def _parse_case(raw: object, index: int) -> dict:

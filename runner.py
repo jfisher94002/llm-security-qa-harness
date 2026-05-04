@@ -15,6 +15,8 @@ RUN_LOG = OUT_DIR / "run_log.csv"
 FAILURES = OUT_DIR / "failures.json"
 SUMMARY = OUT_DIR / "summary.md"
 
+_REQUIRED_FIELDS = ("id", "prompt", "expected")
+
 
 def placeholder_model(prompt: str) -> str:
     """Stub until a real model is wired in."""
@@ -25,18 +27,59 @@ def matches(actual: str, expected: str) -> bool:
     return expected in actual
 
 
+def _parse_case(raw: object, index: int) -> tuple[str, str, str]:
+    if not isinstance(raw, dict):
+        raise SystemExit(
+            f"{CASES_PATH}: case[{index}] must be an object, not {type(raw).__name__}"
+        )
+    missing = [f for f in _REQUIRED_FIELDS if f not in raw]
+    if missing:
+        raise SystemExit(
+            f"{CASES_PATH}: case[{index}] missing required field(s): {', '.join(missing)}"
+        )
+    cid_raw, prompt, expected = raw["id"], raw["prompt"], raw["expected"]
+    if not isinstance(cid_raw, (str, int)):
+        raise SystemExit(
+            f"{CASES_PATH}: case[{index}] 'id' must be a string or integer, "
+            f"not {type(cid_raw).__name__}"
+        )
+    if not isinstance(prompt, str):
+        raise SystemExit(
+            f"{CASES_PATH}: case[{index}] 'prompt' must be a string, "
+            f"not {type(prompt).__name__}"
+        )
+    if not isinstance(expected, str):
+        raise SystemExit(
+            f"{CASES_PATH}: case[{index}] 'expected' must be a string, "
+            f"not {type(expected).__name__}"
+        )
+    return str(cid_raw), prompt, expected
+
+
+def _load_cases() -> list:
+    try:
+        text = CASES_PATH.read_text(encoding="utf-8")
+    except OSError as e:
+        raise SystemExit(f"{CASES_PATH}: could not read file ({e})") from None
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError as e:
+        raise SystemExit(
+            f"{CASES_PATH}: invalid JSON ({e.msg} at line {e.lineno}, column {e.colno})"
+        ) from None
+    if not isinstance(data, list):
+        raise SystemExit(f"{CASES_PATH}: root value must be a JSON array")
+    return data
+
+
 def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    cases = json.loads(CASES_PATH.read_text(encoding="utf-8"))
-    if not isinstance(cases, list):
-        raise SystemExit("test_cases.json must be a JSON array")
+    cases = _load_cases()
 
     rows = []
     failed = []
-    for c in cases:
-        cid = str(c["id"])
-        prompt = c["prompt"]
-        expected = c["expected"]
+    for i, raw in enumerate(cases):
+        cid, prompt, expected = _parse_case(raw, i)
         actual = placeholder_model(prompt)
         ok = matches(actual, expected)
         rows.append((cid, prompt, expected, actual, ok))

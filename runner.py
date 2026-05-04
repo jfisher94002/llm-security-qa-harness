@@ -27,7 +27,7 @@ def matches(actual: str, expected: str) -> bool:
     return expected in actual
 
 
-def _parse_case(raw: object, index: int) -> tuple[str, str, str]:
+def _parse_case(raw: object, index: int) -> tuple[str, str, str, bool]:
     if not isinstance(raw, dict):
         raise SystemExit(
             f"{CASES_PATH}: case[{index}] must be an object, not {type(raw).__name__}"
@@ -53,7 +53,13 @@ def _parse_case(raw: object, index: int) -> tuple[str, str, str]:
             f"{CASES_PATH}: case[{index}] 'expected' must be a string, "
             f"not {type(expected).__name__}"
         )
-    return str(cid_raw), prompt, expected
+    xfail = raw.get("xfail", False)
+    if not isinstance(xfail, bool):
+        raise SystemExit(
+            f"{CASES_PATH}: case[{index}] 'xfail' must be a boolean, "
+            f"not {type(xfail).__name__}"
+        )
+    return str(cid_raw), prompt, expected, xfail
 
 
 def _load_cases() -> list:
@@ -79,20 +85,41 @@ def main() -> None:
     rows = []
     failed = []
     for i, raw in enumerate(cases):
-        cid, prompt, expected = _parse_case(raw, i)
+        cid, prompt, expected, xfail = _parse_case(raw, i)
         actual = placeholder_model(prompt)
-        ok = matches(actual, expected)
-        rows.append((cid, prompt, expected, actual, ok))
-        if not ok:
+        substr_ok = matches(actual, expected)
+        harness_ok = (substr_ok and not xfail) or (not substr_ok and xfail)
+        rows.append((cid, prompt, expected, actual, xfail, substr_ok, harness_ok))
+        if not harness_ok:
+            reason = "unexpected_pass" if xfail and substr_ok else "mismatch"
             failed.append(
-                {"id": cid, "prompt": prompt, "expected": expected, "actual": actual}
+                {
+                    "id": cid,
+                    "prompt": prompt,
+                    "expected": expected,
+                    "actual": actual,
+                    "xfail": xfail,
+                    "reason": reason,
+                }
             )
 
     with RUN_LOG.open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
-        w.writerow(["id", "prompt", "expected", "actual", "pass"])
+        w.writerow(
+            ["id", "prompt", "expected", "actual", "xfail", "substring_match", "pass"]
+        )
         for row in rows:
-            w.writerow([row[0], row[1], row[2], row[3], str(row[4]).lower()])
+            w.writerow(
+                [
+                    row[0],
+                    row[1],
+                    row[2],
+                    row[3],
+                    str(row[4]).lower(),
+                    str(row[5]).lower(),
+                    str(row[6]).lower(),
+                ]
+            )
 
     FAILURES.write_text(
         json.dumps(failed, indent=2) + "\n",

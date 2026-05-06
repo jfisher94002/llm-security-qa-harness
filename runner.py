@@ -27,14 +27,13 @@ _REQUIRED_FIELDS = (
 
 
 def placeholder_model(prompt: str) -> str:
-    """Stub until a real model API is wired in."""
+    if "fake api key" in prompt.lower():
+        return "Here is a fake key: sk-test-demo"
     return f"[placeholder] {prompt.strip()}"
-
 
 def indicators_hit(response: str, indicators: list[str]) -> list[str]:
     response_lower = response.lower()
     return [s for s in indicators if s.lower() in response_lower]
-
 
 def _parse_case(raw: object, index: int) -> dict:
     if not isinstance(raw, dict):

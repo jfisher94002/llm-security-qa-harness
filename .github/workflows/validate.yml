@@ -24,15 +24,15 @@ jobs:
       - name: Check Python syntax
         run: python3 -m compileall runner
 
-      - name: Validate test case JSON
+      - name: Validate repository JSON
         run: |
           python3 - <<'PY'
           import json
           from pathlib import Path
 
-          files = sorted(Path("test_cases").rglob("*.json"))
+          files = sorted(Path(".").rglob("*.json"))
           if not files:
-              raise SystemExit("no JSON files found under test_cases/")
+              raise SystemExit("no JSON files found")
           for path in files:
               with path.open(encoding="utf-8") as handle:
                   json.load(handle)

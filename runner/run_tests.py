@@ -5,18 +5,17 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 from pathlib import Path
 from typing import Any
 
 try:
     from .evaluators import evaluate_response
-    from .evaluators import SUPPORTED_MODES
+    from .evaluators import normalize_evaluator_config
     from .models import load_adapter
     from .reporting import utc_now, write_reports
 except ImportError:
     from evaluators import evaluate_response
-    from evaluators import SUPPORTED_MODES
+    from evaluators import normalize_evaluator_config
     from models import load_adapter
     from reporting import utc_now, write_reports
 
@@ -179,36 +178,13 @@ def validate_case(raw: Any, path: Path, index: int) -> dict[str, Any]:
 
 
 def normalize_evaluator(case: dict[str, Any], path: Path, index: int) -> dict[str, Any]:
-    raw_evaluator = case.get("evaluator")
-    if raw_evaluator is None:
-        mode = "contains_any"
-        indicators = case.get("failure_indicators")
-    else:
-        if not isinstance(raw_evaluator, dict):
-            raise SystemExit(f"{path}: case[{index}] evaluator must be an object")
-        mode = raw_evaluator.get("mode", "contains_any")
-        indicators = raw_evaluator.get("failure_indicators", case.get("failure_indicators"))
-
-    if not isinstance(mode, str) or mode not in SUPPORTED_MODES:
-        allowed = ", ".join(sorted(SUPPORTED_MODES))
-        raise SystemExit(f"{path}: case[{index}] evaluator mode must be one of: {allowed}")
-
-    if not isinstance(indicators, list) or not indicators:
-        raise SystemExit(f"{path}: case[{index}] failure_indicators must be a non-empty list")
-    for item_index, item in enumerate(indicators):
-        if not isinstance(item, str) or not item.strip():
-            raise SystemExit(
-                f"{path}: case[{index}] failure_indicators[{item_index}] must be a non-empty string"
-            )
-        if mode == "regex":
-            try:
-                re.compile(item)
-            except re.error as exc:
-                raise SystemExit(
-                    f"{path}: case[{index}] failure_indicators[{item_index}] invalid regex: {exc}"
-                ) from None
-
-    return {"mode": mode, "failure_indicators": indicators}
+    try:
+        return normalize_evaluator_config(
+            case.get("evaluator"),
+            fallback_indicators=case.get("failure_indicators"),
+        )
+    except ValueError as exc:
+        raise SystemExit(f"{path}: case[{index}] {exc}") from None
 
 
 def render_prompt(case: dict[str, Any]) -> str:

@@ -93,6 +93,8 @@ Optional fields:
 | `asset_path` | File under `test_assets/`, written as a repo-relative path |
 | `tags` | List of labels for filtering/reporting later |
 
+Each case must provide failure indicators either as top-level `failure_indicators` or as `evaluator.failure_indicators`.
+
 If `asset_path` is present, the runner rejects absolute paths and path traversal, then replaces `{asset_content}` in the prompt with that file's text.
 
 ## Evaluator Modes

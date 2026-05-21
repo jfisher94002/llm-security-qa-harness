@@ -10,13 +10,14 @@ from typing import Any
 
 try:
     from .evaluators import evaluate_response
+    from .evaluators import normalize_evaluator_config
     from .models import load_adapter
     from .reporting import utc_now, write_reports
 except ImportError:
     from evaluators import evaluate_response
+    from evaluators import normalize_evaluator_config
     from models import load_adapter
     from reporting import utc_now, write_reports
-
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CASE_DIR = ROOT / "test_cases"
@@ -29,7 +30,6 @@ REQUIRED_FIELDS = {
     "title",
     "severity",
     "prompt",
-    "failure_indicators",
     "expected_safe_behavior",
 }
 
@@ -46,7 +46,7 @@ def main() -> None:
         rendered_prompt = render_prompt(case)
         for repeat_index in range(1, args.runs + 1):
             response = adapter.generate(rendered_prompt)
-            result = evaluate_response(response, case["failure_indicators"])
+            result = evaluate_response(response, case["evaluator"])
             records.append(
                 {
                     "run_id": run_id,
@@ -60,6 +60,7 @@ def main() -> None:
                     "adapter": adapter.name,
                     "model": adapter.model,
                     "pass": result.passed,
+                    "evaluator_mode": case["evaluator"]["mode"],
                     "matched_indicators": result.matched_indicators,
                     "asset_path": case.get("asset_path", ""),
                     "prompt_template": case["prompt"],
@@ -159,18 +160,12 @@ def validate_case(raw: Any, path: Path, index: int) -> dict[str, Any]:
         raise SystemExit(f"{path}: case[{index}] missing fields: {', '.join(missing)}")
 
     case = dict(raw)
-    for field in REQUIRED_FIELDS - {"failure_indicators"}:
+    for field in REQUIRED_FIELDS:
         if not isinstance(case[field], str) or not case[field].strip():
             raise SystemExit(f"{path}: case[{index}] '{field}' must be a non-empty string")
 
-    indicators = case["failure_indicators"]
-    if not isinstance(indicators, list) or not indicators:
-        raise SystemExit(f"{path}: case[{index}] failure_indicators must be a non-empty list")
-    for item_index, item in enumerate(indicators):
-        if not isinstance(item, str) or not item.strip():
-            raise SystemExit(
-                f"{path}: case[{index}] failure_indicators[{item_index}] must be a non-empty string"
-            )
+    case["evaluator"] = normalize_evaluator(case, path, index)
+    case["failure_indicators"] = case["evaluator"]["failure_indicators"]
 
     if "asset_path" in case:
         validate_asset_path(case["asset_path"], path, index)
@@ -180,6 +175,16 @@ def validate_case(raw: Any, path: Path, index: int) -> dict[str, Any]:
     ):
         raise SystemExit(f"{path}: case[{index}] tags must be a list of strings")
     return case
+
+
+def normalize_evaluator(case: dict[str, Any], path: Path, index: int) -> dict[str, Any]:
+    try:
+        return normalize_evaluator_config(
+            case.get("evaluator"),
+            fallback_indicators=case.get("failure_indicators"),
+        )
+    except ValueError as exc:
+        raise SystemExit(f"{path}: case[{index}] {exc}") from None
 
 
 def render_prompt(case: dict[str, Any]) -> str:

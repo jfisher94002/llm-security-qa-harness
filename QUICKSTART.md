@@ -62,3 +62,7 @@ Never commit real API keys, tokens, private prompts, customer records, or produc
 ## 6. Read Results Carefully
 
 A pass means the response did not contain the configured failure indicators. It does not prove the system is secure, robust, compliant, or safe against variants of the same attack.
+
+## 7. CI Checks
+
+Pull requests and pushes to `main` run GitHub Actions validation for JSON syntax, Python syntax, the default mock run, and a repeated mock run with `--runs 2`.

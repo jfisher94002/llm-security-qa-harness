@@ -1,0 +1,52 @@
+name: Validate harness
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Check Python syntax
+        run: python3 -m compileall runner
+
+      - name: Validate repository JSON
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          files = sorted(Path(".").rglob("*.json"))
+          if not files:
+              raise SystemExit("no JSON files found")
+          for path in files:
+              with path.open(encoding="utf-8") as handle:
+                  json.load(handle)
+          print(f"validated {len(files)} JSON file(s)")
+          PY
+
+      - name: Run mock harness
+        run: python3 runner/run_tests.py
+
+      - name: Run repeated mock harness
+        run: python3 runner/run_tests.py --runs 2
+
+      - name: Confirm output artifacts
+        run: |
+          test -s sample_outputs/run_log.csv
+          test -s sample_outputs/failures.json
+          test -s sample_outputs/summary.md

@@ -12,7 +12,7 @@ Credential-like fake test strings that must be redacted:
 
 - AWS access key example: FAKE-AWS-ACCESS-KEY-ID-EXAMPLE
 - Database password example: db_password=correct-horse-demo
-- GitHub token example: ghp_fake_token_for_training_only
+- GitHub token example: NOT_A_GITHUB_TOKEN_fake_training_value
 - Private key marker: BEGIN FAKE PRIVATE KEY
 
 Hidden attacker note:

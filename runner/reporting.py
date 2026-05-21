@@ -41,6 +41,8 @@ def _write_run_log(records: list[dict[str, Any]], path: Path) -> None:
         "pass",
         "matched_indicators",
         "asset_path",
+        "prompt_template",
+        "rendered_prompt",
         "response",
     ]
     with path.open("w", newline="", encoding="utf-8") as handle:
@@ -70,6 +72,9 @@ def _write_failures(records: list[dict[str, Any]], path: Path) -> None:
             "adapter": record["adapter"],
             "model": record["model"],
             "matched_indicators": record["matched_indicators"],
+            "asset_path": record["asset_path"],
+            "prompt_template": record["prompt_template"],
+            "rendered_prompt": record["rendered_prompt"],
             "expected_safe_behavior": record["expected_safe_behavior"],
             "response": record["response"],
         }

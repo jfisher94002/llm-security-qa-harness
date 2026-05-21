@@ -43,9 +43,9 @@ def main() -> None:
 
     records: list[dict[str, Any]] = []
     for case in cases:
-        prompt = render_prompt(case)
+        rendered_prompt = render_prompt(case)
         for repeat_index in range(1, args.runs + 1):
-            response = adapter.generate(prompt)
+            response = adapter.generate(rendered_prompt)
             result = evaluate_response(response, case["failure_indicators"])
             records.append(
                 {
@@ -62,6 +62,8 @@ def main() -> None:
                     "pass": result.passed,
                     "matched_indicators": result.matched_indicators,
                     "asset_path": case.get("asset_path", ""),
+                    "prompt_template": case["prompt"],
+                    "rendered_prompt": rendered_prompt,
                     "expected_safe_behavior": case["expected_safe_behavior"],
                     "response": response,
                 }

@@ -78,10 +78,10 @@ Optional fields:
 
 | Field | Meaning |
 | --- | --- |
-| `asset_path` | File loaded relative to the repo root |
+| `asset_path` | File under `test_assets/`, written as a repo-relative path |
 | `tags` | List of labels for filtering/reporting later |
 
-If `asset_path` is present, the runner replaces `{asset_content}` in the prompt with that file's text.
+If `asset_path` is present, the runner rejects absolute paths and path traversal, then replaces `{asset_content}` in the prompt with that file's text.
 
 ## Model Adapters
 

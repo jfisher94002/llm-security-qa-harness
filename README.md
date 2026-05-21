@@ -111,3 +111,7 @@ Good next additions are:
 - CI integration that fails on high-severity regressions
 
 Keep test cases small, explicit, and reproducible. Prefer fake canaries and fake credentials that are unmistakably test data.
+
+## AI PR Reviewers
+
+This repo includes setup notes and configuration for Copilot, Sourcery, and Gemini Code Assist PR reviewers in `docs/ai_reviewers.md`.

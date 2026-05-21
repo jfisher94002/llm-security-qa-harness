@@ -1,0 +1,7 @@
+# Example only. Do not put real API keys in this file.
+adapter: openai
+model: replace-with-your-model
+base_url: https://api.openai.com/v1
+api_key_env: OPENAI_API_KEY
+temperature: 0
+timeout_seconds: 60

@@ -1,41 +1,117 @@
-# llm-security-qa-harness
+# LLM Security QA Harness
 
-Lightweight local harness for **LLM security regression testing**: you define prompts and string patterns that should **not** appear in model output; the runner records pass/fail per case and writes reports under `sample_outputs/`.
+A practical starter kit for repeatable LLM security QA checks focused on:
 
-**Scope:** This tool currently uses **simple substring checks** on responses. It is useful for repeatable smoke checks and regression gates, not for proving that a model is safe in general.
+- **OWASP LLM01: Prompt Injection**
+- **OWASP LLM02: Sensitive Information Disclosure**
 
-## Run
+The harness loads JSON test cases from a directory, runs each case one or more times against a model adapter, applies basic string-matching evaluators, and writes CSV/JSON/Markdown reports.
+
+> Passing these tests does **not** prove an application, prompt, model, retrieval system, or agent is secure. It only means the configured failure strings were not observed in the sampled responses for this run.
+
+## What Is Included
+
+- Directory-based JSON test cases for LLM01 and LLM02
+- Fake but realistic poisoned documents and sensitive-looking test assets
+- A mock model adapter that works without API keys or local models
+- Optional Ollama and OpenAI HTTP adapter examples
+- Simple case-insensitive string evaluators
+- Repeated runs per test case
+- Reports written to `sample_outputs/run_log.csv`, `sample_outputs/failures.json`, and `sample_outputs/summary.md`
+
+## Quick Run
 
 ```bash
-python3 runner.py
+python3 runner/run_tests.py
 ```
 
-No dependencies beyond Python 3 (standard library only). A **placeholder** model stub is used until you wire in a real inference path.
+Run each case three times:
 
-## Test case format (`test_cases.json`)
+```bash
+python3 runner/run_tests.py --runs 3
+```
 
-Each case is a JSON object with:
+Write output somewhere else:
+
+```bash
+python3 runner/run_tests.py --output ./tmp_results
+```
+
+Use an adapter config:
+
+```bash
+python3 runner/run_tests.py --config config/ollama.example.yaml
+python3 runner/run_tests.py --config config/openai.example.yaml
+```
+
+The default mock adapter is intentionally conservative and does not need network access, API keys, Ollama, or third-party packages.
+
+## Repository Layout
+
+```text
+config/                 Example adapter configs
+docs/                   QA workflow and evaluator notes
+runner/                 Python harness implementation
+sample_outputs/         Example reports from a mock run
+test_assets/            Fake source documents used by indirect tests
+test_cases/             JSON test cases grouped by OWASP category
+```
+
+## Test Case Format
+
+Each JSON file can contain one case object or a list of case objects.
+
+Required fields:
 
 | Field | Meaning |
-| ----- | ------- |
-| `id` | Stable identifier |
-| `category` | e.g. `prompt_injection`, `sensitive_disclosure` |
-| `title` | Short human-readable name |
-| `prompt` | Text sent to the model |
-| `failure_indicators` | List of substrings; **if any** appears in the response (case-insensitive), the case **fails** |
-| `expected_safe_behavior` | What a good response should do (documentation for humans; not executed) |
-| `severity` | Your own severity label (e.g. `high`) |
+| --- | --- |
+| `id` | Stable case identifier |
+| `owasp_id` | `LLM01` or `LLM02` |
+| `category` | Human-readable category slug |
+| `title` | Short test name |
+| `severity` | Informational severity label |
+| `prompt` | Prompt template sent to the model |
+| `failure_indicators` | Strings that must not appear in the model response |
+| `expected_safe_behavior` | Human-readable expected behavior |
 
-## What a passing test means
+Optional fields:
 
-A case **passes** when **none** of the `failure_indicators` appear anywhere in the model’s response (plain substring match, **case-insensitive**). That only shows the output did not contain those specific strings on this run—it does **not** mean the model is robust to all attacks, free of other harmful content, or compliant with policy.
+| Field | Meaning |
+| --- | --- |
+| `asset_path` | File under `test_assets/`, written as a repo-relative path |
+| `tags` | List of labels for filtering/reporting later |
 
-## Outputs
+If `asset_path` is present, the runner rejects absolute paths and path traversal, then replaces `{asset_content}` in the prompt with that file's text.
+
+## Model Adapters
+
+The harness supports three simple adapters:
+
+- `mock`: default, offline, no dependencies
+- `ollama`: calls a local Ollama `/api/generate` endpoint
+- `openai`: calls the OpenAI chat completions HTTP endpoint using an environment variable for the API key
+
+The examples under `config/` are templates. Do not commit real credentials.
+
+## Reports
 
 After a run:
 
-- `sample_outputs/run_log.csv` — one row per case
-- `sample_outputs/failures.json` — cases where at least one indicator matched
-- `sample_outputs/summary.md` — counts and timestamp
+- `run_log.csv` contains one row per case run
+- `failures.json` contains failed case details and matched indicators
+- `summary.md` contains aggregate counts and a security caveat
 
-Example outputs from a **placeholder** run are checked in under `sample_outputs/` so the layout is easy to browse without running the script.
+## Extending The Kit
+
+Good next additions are:
+
+- Test case filters by OWASP ID, tag, and severity
+- Structured evaluators for refusal quality and data minimization
+- Application-specific adapters for your real RAG or agent endpoint
+- CI integration that fails on high-severity regressions
+
+Keep test cases small, explicit, and reproducible. Prefer fake canaries and fake credentials that are unmistakably test data.
+
+## AI PR Reviewers
+
+This repo includes setup notes and configuration for Copilot, Sourcery, and Gemini Code Assist PR reviewers in `docs/ai_reviewers.md`.

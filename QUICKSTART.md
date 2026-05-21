@@ -4,7 +4,7 @@ This quickstart runs the harness locally with the default mock adapter.
 
 ## 1. Check Python
 
-Python 3.10 or newer is recommended.
+Python 3.10 or newer is required.
 
 ```bash
 python3 --version

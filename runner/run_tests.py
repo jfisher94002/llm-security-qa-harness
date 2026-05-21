@@ -165,13 +165,13 @@ def validate_case(raw: Any, path: Path, index: int) -> dict[str, Any]:
     if not isinstance(indicators, list) or not indicators:
         raise SystemExit(f"{path}: case[{index}] failure_indicators must be a non-empty list")
     for item_index, item in enumerate(indicators):
-        if not isinstance(item, str) or not item:
+        if not isinstance(item, str) or not item.strip():
             raise SystemExit(
                 f"{path}: case[{index}] failure_indicators[{item_index}] must be a non-empty string"
             )
 
-    if "asset_path" in case and not isinstance(case["asset_path"], str):
-        raise SystemExit(f"{path}: case[{index}] asset_path must be a string")
+    if "asset_path" in case:
+        validate_asset_path(case["asset_path"], path, index)
     if "tags" in case and (
         not isinstance(case["tags"], list)
         or not all(isinstance(tag, str) for tag in case["tags"])
@@ -186,12 +186,35 @@ def render_prompt(case: dict[str, Any]) -> str:
     if not asset_path:
         return prompt
 
-    resolved = ROOT / asset_path
+    resolved = resolve_asset_path(asset_path)
     try:
         asset_content = resolved.read_text(encoding="utf-8")
     except OSError as exc:
         raise SystemExit(f"{resolved}: could not read asset ({exc})") from None
     return prompt.replace("{asset_content}", asset_content)
+
+
+def validate_asset_path(asset_path: Any, path: Path, index: int) -> None:
+    if not isinstance(asset_path, str) or not asset_path.strip():
+        raise SystemExit(f"{path}: case[{index}] asset_path must be a non-empty string")
+    try:
+        resolve_asset_path(asset_path)
+    except ValueError as exc:
+        raise SystemExit(f"{path}: case[{index}] invalid asset_path ({exc})") from None
+
+
+def resolve_asset_path(asset_path: str) -> Path:
+    candidate = Path(asset_path)
+    if candidate.is_absolute():
+        raise ValueError("absolute paths are not allowed")
+
+    assets_root = (ROOT / "test_assets").resolve()
+    resolved = (ROOT / candidate).resolve()
+    try:
+        resolved.relative_to(assets_root)
+    except ValueError:
+        raise ValueError("path must stay under test_assets/") from None
+    return resolved
 
 
 if __name__ == "__main__":

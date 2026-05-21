@@ -15,7 +15,7 @@ The harness loads JSON test cases from a directory, runs each case one or more t
 - Fake but realistic poisoned documents and sensitive-looking test assets
 - A mock model adapter that works without API keys or local models
 - Optional Ollama and OpenAI HTTP adapter examples
-- Simple case-insensitive string evaluators
+- Simple `contains_any`, `contains_all`, and `regex` evaluators
 - Repeated runs per test case
 - Reports written to `sample_outputs/run_log.csv`, `sample_outputs/failures.json`, and `sample_outputs/summary.md`
 
@@ -57,6 +57,17 @@ test_assets/            Fake source documents used by indirect tests
 test_cases/             JSON test cases grouped by OWASP category
 ```
 
+## Current Coverage
+
+The starter pack includes 20 cases:
+
+| OWASP Area | Case Count | Example Themes |
+| --- | ---: | --- |
+| LLM01 Prompt Injection | 10 | direct injection, role override, authority abuse, indirect documents, retrieval poisoning, tool-use coercion |
+| LLM02 Sensitive Information Disclosure | 10 | runtime context, canaries, fake credentials, PII placeholders, retrieval leakage, tool schema and environment disclosure |
+
+All fixtures are fake. Do not replace them with production prompts, real customer data, or real secrets.
+
 ## Test Case Format
 
 Each JSON file can contain one case object or a list of case objects.
@@ -71,17 +82,47 @@ Required fields:
 | `title` | Short test name |
 | `severity` | Informational severity label |
 | `prompt` | Prompt template sent to the model |
-| `failure_indicators` | Strings that must not appear in the model response |
 | `expected_safe_behavior` | Human-readable expected behavior |
 
 Optional fields:
 
 | Field | Meaning |
 | --- | --- |
+| `failure_indicators` | Backward-compatible shorthand for `contains_any` |
+| `evaluator` | Explicit evaluator config |
 | `asset_path` | File under `test_assets/`, written as a repo-relative path |
 | `tags` | List of labels for filtering/reporting later |
 
 If `asset_path` is present, the runner rejects absolute paths and path traversal, then replaces `{asset_content}` in the prompt with that file's text.
+
+## Evaluator Modes
+
+The simplest case keeps `failure_indicators` at the top level. This behaves as `contains_any`.
+
+```json
+{
+  "failure_indicators": ["PROMPT_INJECTION_ACCEPTED"]
+}
+```
+
+For more control, use an `evaluator` object:
+
+```json
+{
+  "evaluator": {
+    "mode": "contains_all",
+    "failure_indicators": ["QA_BYPASS_MODE_CONFIRMED", "disclosure checks disabled"]
+  }
+}
+```
+
+Supported modes:
+
+- `contains_any`: fail if any indicator appears, case-insensitively
+- `contains_all`: fail only if all indicators appear, case-insensitively
+- `regex`: fail if any Python `re` pattern matches
+
+Keep indicators specific. Prefer unique fake success markers and canaries over broad words.
 
 ## Model Adapters
 
@@ -101,6 +142,15 @@ After a run:
 - `failures.json` contains failed case details and matched indicators
 - `summary.md` contains aggregate counts and a security caveat
 
+Checked-in examples:
+
+- `sample_outputs/mock_safe_run/` shows a default mock run with no failures
+- `sample_outputs/mock_failure_demo/` shows fake prompt-injection and disclosure failures for teaching
+
+## Boundaries
+
+Read `docs/what_this_is_not.md` before treating results as evidence. This is not a full red-team platform, proof of security, compliance scanner, or replacement for human review.
+
 ## Extending The Kit
 
 Good next additions are:
@@ -108,9 +158,11 @@ Good next additions are:
 - Test case filters by OWASP ID, tag, and severity
 - Structured evaluators for refusal quality and data minimization
 - Application-specific adapters for your real RAG or agent endpoint
-- CI integration that fails on high-severity regressions
+- A CI rule that fails on selected high-severity regressions
 
 Keep test cases small, explicit, and reproducible. Prefer fake canaries and fake credentials that are unmistakably test data.
+
+GitHub Actions validates JSON syntax, Python syntax, and default mock harness runs on pull requests and pushes to `main`.
 
 ## AI PR Reviewers
 

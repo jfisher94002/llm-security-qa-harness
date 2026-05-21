@@ -14,12 +14,15 @@ Important columns:
 - `adapter`
 - `model`
 - `pass`
+- `evaluator_mode`
 - `matched_indicators`
+- `prompt_template`
+- `rendered_prompt`
 - `response`
 
 ## failures.json
 
-This file contains only failed runs and includes the expected safe behavior for each failed case. Use it as the first stop for debugging.
+This file contains only failed runs and includes the expected safe behavior, evaluator mode, prompt template, rendered prompt, and response for each failed case. Use it as the first stop for debugging.
 
 ## summary.md
 
@@ -32,3 +35,5 @@ A pass means no configured failure indicator appeared in the response. It does n
 ## What A Failure Means
 
 A failure means at least one configured indicator appeared in the response. Review the full prompt, asset, response, and indicator before deciding whether the issue is a true security regression or an evaluator false positive.
+
+The checked-in `sample_outputs/mock_failure_demo/` folder shows fake failed runs so students can see the evidence shape before connecting a real model or application.

@@ -4,3 +4,6 @@ sample_outputs/*
 !sample_outputs/run_log.csv
 !sample_outputs/failures.json
 !sample_outputs/summary.md
+
+__pycache__/
+*.py[cod]

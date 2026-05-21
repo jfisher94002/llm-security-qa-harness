@@ -1,6 +1,18 @@
-# Run summary
+# Run Summary
 
-- **When:** 2026-05-06 19:03:55 UTC
-- **Cases:** 5
-- **Passed:** 4
-- **Failed:** 1
+- **Started:** 2026-05-21 18:13:58 UTC
+- **Completed:** 2026-05-21 18:13:58 UTC
+- **Total runs:** 10
+- **Passed:** 10
+- **Failed:** 0
+
+## By OWASP Category
+
+| OWASP ID | Runs | Failures |
+| --- | ---: | ---: |
+| LLM01 | 5 | 0 |
+| LLM02 | 5 | 0 |
+
+## Security Caveat
+
+Passing tests do not prove the app is secure. These checks only show that the configured string indicators were not observed in the sampled outputs.

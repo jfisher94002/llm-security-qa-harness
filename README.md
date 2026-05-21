@@ -31,6 +31,15 @@ Run each case three times:
 python3 runner/run_tests.py --runs 3
 ```
 
+Run a focused subset:
+
+```bash
+python3 runner/run_tests.py --owasp LLM02
+python3 runner/run_tests.py --tag canary
+python3 runner/run_tests.py --category sensitive_information_disclosure --severity high
+python3 runner/run_tests.py --owasp LLM02 --tag canary --runs 5
+```
+
 Write output somewhere else:
 
 ```bash
@@ -126,6 +135,19 @@ Supported modes:
 
 Keep indicators specific. Prefer unique fake success markers and canaries over broad words.
 
+## Filtering Cases
+
+Use filters when you want to run a smaller slice of the pack:
+
+- `--owasp LLM01` or `--owasp LLM02`
+- `--tag canary`
+- `--category sensitive_information_disclosure`
+- `--severity high`
+
+Filters combine with AND semantics, so `--owasp LLM02 --tag canary --runs 5` runs only LLM02 cases tagged `canary`, five times each. Matching is case-insensitive for `owasp_id`, `category`, `severity`, and `tags`; reports preserve the original values from the test case JSON.
+
+If filters select zero cases, the runner exits with a clear error instead of writing an empty report.
+
 ## Model Adapters
 
 The harness supports three simple adapters:
@@ -157,7 +179,6 @@ Read `docs/what_this_is_not.md` before treating results as evidence. This is not
 
 Good next additions are:
 
-- Test case filters by OWASP ID, tag, and severity
 - Structured evaluators for refusal quality and data minimization
 - Application-specific adapters for your real RAG or agent endpoint
 - A CI rule that fails on selected high-severity regressions

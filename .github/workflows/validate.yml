@@ -45,6 +45,9 @@ jobs:
       - name: Run repeated mock harness
         run: python3 runner/run_tests.py --runs 2
 
+      - name: Run filtered mock harness
+        run: python3 runner/run_tests.py --owasp LLM02 --runs 2
+
       - name: Confirm output artifacts
         run: |
           test -s sample_outputs/run_log.csv

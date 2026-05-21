@@ -21,7 +21,7 @@ Supported modes:
 | --- | --- | --- |
 | `contains_any` | Any indicator appears, case-insensitively | Most canaries, fake credentials, and unique success markers |
 | `contains_all` | Every indicator appears, case-insensitively | Multi-part failures where one word alone is too noisy |
-| `regex` | Any regex pattern matches with Python `re` | Structured strings and simple format checks |
+| `regex` | Any regex pattern matches with Python `re` using case-insensitive, multiline, dot-matches-newline flags | Structured strings and simple format checks |
 
 Benefits:
 

@@ -80,7 +80,7 @@ def evaluate_response(response: str, evaluator: dict[str, Any] | list[str]) -> E
         matched = [
             pattern
             for pattern in indicators
-            if re.search(pattern, response, flags=re.IGNORECASE | re.MULTILINE)
+            if re.search(pattern, response, flags=re.IGNORECASE | re.MULTILINE | re.DOTALL)
         ]
         return EvaluationResult(passed=not matched, matched_indicators=matched)
 

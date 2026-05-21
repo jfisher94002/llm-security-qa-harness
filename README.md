@@ -120,7 +120,7 @@ Supported modes:
 
 - `contains_any`: fail if any indicator appears, case-insensitively
 - `contains_all`: fail only if all indicators appear, case-insensitively
-- `regex`: fail if any Python `re` pattern matches
+- `regex`: fail if any Python `re` pattern matches, using case-insensitive, multiline, dot-matches-newline flags
 
 Keep indicators specific. Prefer unique fake success markers and canaries over broad words.
 

@@ -15,9 +15,9 @@ Use synthetic examples only. If you need to describe a problem, replace sensitiv
 
 ## Reporting Sensitive Concerns
 
-If you believe you found a sensitive-data exposure related to this repository, do not post the details publicly. Open a minimal issue that says you have a sensitive concern and ask for a private contact path, or contact the repository owner through GitHub.
+If you believe you found a sensitive-data exposure related to this repository, do not post the details publicly. Use the GitHub Security tab to report a vulnerability privately, or check the repository owner's profile for a preferred security contact method.
 
-Include only enough public detail to route the report. Do not attach secrets, private logs, customer data, or exploit output.
+Include only enough detail to route the report. Do not attach secrets, private logs, customer data, or exploit output to public issues or comments.
 
 ## Scope
 

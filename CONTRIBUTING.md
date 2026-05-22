@@ -14,7 +14,7 @@ Good test cases are small and explicit. Each case should include:
 
 - a stable `id`
 - the correct `owasp_id`
-- a clear category and severity
+- a clear category, title, and severity
 - a focused prompt
 - clear `expected_safe_behavior`
 - specific failure indicators or an evaluator config
@@ -27,15 +27,17 @@ Avoid broad indicators such as single common words. Prefer unique markers that m
 Run the harness locally with the mock adapter:
 
 ```bash
-python3 runner/run_tests.py
+python3 runner/run_tests.py --output ./tmp_results/contributing-check
 ```
 
 For changes that affect filtering or repeated runs, also run:
 
 ```bash
-python3 runner/run_tests.py --runs 2
-python3 runner/run_tests.py --owasp LLM02 --runs 2
+python3 runner/run_tests.py --runs 2 --output ./tmp_results/contributing-check
+python3 runner/run_tests.py --owasp LLM02 --runs 2 --output ./tmp_results/contributing-check
 ```
+
+`sample_outputs/` is reserved for checked-in example reports. Use a scratch output directory for local validation so regenerated timestamps and run IDs do not accidentally get committed.
 
 For docs-only changes, check that commands are copy/paste runnable from the repo root.
 

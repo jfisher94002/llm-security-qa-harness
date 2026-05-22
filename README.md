@@ -181,6 +181,10 @@ Checked-in examples:
 
 Read `docs/what_this_is_not.md` before treating results as evidence. This is not a full red-team platform, proof of security, compliance scanner, or replacement for human review.
 
+## Course Paths
+
+Use the [course map](docs/course_map.md) to find the LLM01 prompt-injection path, the LLM02 sensitive-disclosure path, and the bonus automation path.
+
 ## Contributing And Security
 
 - Read [CONTRIBUTING.md](CONTRIBUTING.md) before adding cases, docs, or runner changes.

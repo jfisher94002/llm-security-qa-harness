@@ -37,6 +37,8 @@ REQUIRED_FIELDS = {
 def main() -> None:
     args = parse_args()
     cases = load_cases(args.cases)
+    if not cases:
+        raise SystemExit(f"{args.cases}: no test cases loaded")
     total_cases = len(cases)
     cases = filter_cases(
         cases,
@@ -121,7 +123,10 @@ def parse_args() -> argparse.Namespace:
         "--tag",
         action="append",
         default=[],
-        help="Run only cases with this tag. Can be used more than once.",
+        help=(
+            "Run only cases with this tag. Can be used more than once; "
+            "cases must include all requested tags."
+        ),
     )
     parser.add_argument(
         "--category",

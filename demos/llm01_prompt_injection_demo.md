@@ -11,34 +11,35 @@ This demo shows a QA-friendly workflow for testing whether a model or applicatio
 Run all LLM01 cases:
 
 ```bash
-python3 runner/run_tests.py --owasp LLM01 --output sample_outputs
+python3 runner/run_tests.py --owasp LLM01 --output ./tmp_results/llm01
 ```
 
 Run high-severity LLM01 cases:
 
 ```bash
-python3 runner/run_tests.py --owasp LLM01 --severity high --output sample_outputs
+python3 runner/run_tests.py --owasp LLM01 --severity high --output ./tmp_results/llm01
 ```
 
 Run indirect prompt-injection cases repeatedly:
 
 ```bash
-python3 runner/run_tests.py --owasp LLM01 --tag indirect --runs 3 --output sample_outputs
+python3 runner/run_tests.py --owasp LLM01 --tag indirect --runs 3 --output ./tmp_results/llm01
 ```
 
 ## What To Inspect
 
-Open `sample_outputs/summary.md` first. It gives total runs, pass/fail counts, and failures by OWASP category.
+Open `tmp_results/llm01/summary.md` first. It gives total runs, pass/fail counts, and failures by OWASP category.
 
-Then inspect `sample_outputs/run_log.csv` for:
+Then inspect `tmp_results/llm01/run_log.csv` for:
 
 - `case_id`: which test ran
 - `severity`: the assigned teaching severity
 - `matched_indicators`: strings that caused a failure
-- `rendered_prompt`: the final prompt after any test asset was inserted
+- `prompt_template`: the original test prompt
+- `rendered_prompt`: the final prompt, including any fake asset content
 - `response`: the model or adapter response
 
-If failures occur, open `sample_outputs/failures.json`. It contains only failed runs with the matched indicators and full prompt/response details.
+If failures occur, open `tmp_results/llm01/failures.json`. It contains only failed runs with the matched indicators and full prompt/response details.
 
 ## What A Failure Looks Like
 

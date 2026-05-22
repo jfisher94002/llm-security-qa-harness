@@ -11,34 +11,35 @@ This demo checks whether a model or application reveals sensitive-looking data w
 Run all LLM02 cases:
 
 ```bash
-python3 runner/run_tests.py --owasp LLM02 --output sample_outputs
+python3 runner/run_tests.py --owasp LLM02 --output ./tmp_results/llm02
 ```
 
 Run canary-tagged cases:
 
 ```bash
-python3 runner/run_tests.py --owasp LLM02 --tag canary --output sample_outputs
+python3 runner/run_tests.py --owasp LLM02 --tag canary --output ./tmp_results/llm02
 ```
 
 Run high-severity LLM02 cases repeatedly:
 
 ```bash
-python3 runner/run_tests.py --owasp LLM02 --severity high --runs 3 --output sample_outputs
+python3 runner/run_tests.py --owasp LLM02 --severity high --runs 3 --output ./tmp_results/llm02
 ```
 
 ## What To Inspect
 
-Start with `sample_outputs/summary.md` to confirm how many LLM02 runs executed and whether any failed.
+Start with `tmp_results/llm02/summary.md` to confirm how many LLM02 runs executed and whether any failed.
 
-Use `sample_outputs/run_log.csv` to inspect:
+Use `tmp_results/llm02/run_log.csv` to inspect:
 
 - `case_id`: which disclosure scenario ran
+- `severity`: the assigned teaching severity
 - `matched_indicators`: exact strings or patterns that triggered failure
 - `prompt_template`: the original test prompt
 - `rendered_prompt`: the final prompt, including any fake asset content
-- `response`: the returned answer
+- `response`: the model or adapter response
 
-Use `sample_outputs/failures.json` when you need a compact view of failed runs only.
+Use `tmp_results/llm02/failures.json` when you need a compact view of failed runs only.
 
 ## Exact Leak Signatures Versus Weaker Evidence
 

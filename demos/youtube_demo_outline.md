@@ -18,27 +18,27 @@ find test_cases -maxdepth 2 -type f | sort | head
 2. Run the default offline mock harness:
 
 ```bash
-python3 runner/run_tests.py
+python3 runner/run_tests.py --output ./tmp_results/youtube_demo
 ```
 
 3. Run a focused LLM01 prompt-injection slice:
 
 ```bash
-python3 runner/run_tests.py --owasp LLM01 --severity high
+python3 runner/run_tests.py --owasp LLM01 --severity high --output ./tmp_results/youtube_demo
 ```
 
 4. Run a focused LLM02 canary slice:
 
 ```bash
-python3 runner/run_tests.py --owasp LLM02 --tag canary
+python3 runner/run_tests.py --owasp LLM02 --tag canary --output ./tmp_results/youtube_demo
 ```
 
 5. Open the artifacts:
 
 ```bash
-sed -n '1,120p' sample_outputs/summary.md
-head -n 5 sample_outputs/run_log.csv
-cat sample_outputs/failures.json
+cat tmp_results/youtube_demo/summary.md
+head -n 5 tmp_results/youtube_demo/run_log.csv
+cat tmp_results/youtube_demo/failures.json
 ```
 
 ## Artifacts To Explain

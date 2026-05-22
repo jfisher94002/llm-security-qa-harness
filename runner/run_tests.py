@@ -37,6 +37,17 @@ REQUIRED_FIELDS = {
 def main() -> None:
     args = parse_args()
     cases = load_cases(args.cases)
+    if not cases:
+        raise SystemExit(f"{args.cases}: no test cases loaded")
+    total_cases = len(cases)
+    cases = filter_cases(
+        cases,
+        owasp=args.owasp,
+        tag=args.tag,
+        category=args.category,
+        severity=args.severity,
+    )
+    print(f"Selected {len(cases)} of {total_cases} case(s) after filtering.")
     adapter = load_adapter(args.config)
     started_at = utc_now()
     run_id = started_at.replace(" UTC", "Z").replace(" ", "T").replace(":", "")
@@ -104,6 +115,27 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Optional simple YAML adapter config. Defaults to mock adapter.",
     )
+    parser.add_argument(
+        "--owasp",
+        help="Run only cases with this OWASP ID, such as LLM01 or LLM02.",
+    )
+    parser.add_argument(
+        "--tag",
+        action="append",
+        default=[],
+        help=(
+            "Run only cases with this tag. Can be used more than once; "
+            "cases must include all requested tags."
+        ),
+    )
+    parser.add_argument(
+        "--category",
+        help="Run only cases with this category.",
+    )
+    parser.add_argument(
+        "--severity",
+        help="Run only cases with this severity.",
+    )
     return parser.parse_args()
 
 
@@ -133,6 +165,62 @@ def load_cases(path: Path) -> list[dict[str, Any]]:
             seen_ids.add(case["id"])
             cases.append(case)
     return cases
+
+
+def filter_cases(
+    cases: list[dict[str, Any]],
+    *,
+    owasp: str | None = None,
+    tag: list[str] | None = None,
+    category: str | None = None,
+    severity: str | None = None,
+) -> list[dict[str, Any]]:
+    requested_tags = tag or []
+
+    def matches(case: dict[str, Any]) -> bool:
+        return (
+            matches_text(case["owasp_id"], owasp)
+            and matches_text(case["category"], category)
+            and matches_text(case["severity"], severity)
+            and matches_tags(case.get("tags", []), requested_tags)
+        )
+
+    selected = [case for case in cases if matches(case)]
+    if not selected:
+        filters = describe_filters(owasp, requested_tags, category, severity)
+        raise SystemExit(f"filters selected zero cases: {filters}")
+    return selected
+
+
+def matches_text(value: str, requested: str | None) -> bool:
+    if requested is None:
+        return True
+    return value.casefold() == requested.casefold()
+
+
+def matches_tags(values: list[str], requested: list[str]) -> bool:
+    if not requested:
+        return True
+    available = {value.casefold() for value in values}
+    return all(item.casefold() in available for item in requested)
+
+
+def describe_filters(
+    owasp: str | None,
+    tags: list[str],
+    category: str | None,
+    severity: str | None,
+) -> str:
+    parts: list[str] = []
+    if owasp is not None:
+        parts.append(f"owasp={owasp}")
+    for tag in tags:
+        parts.append(f"tag={tag}")
+    if category is not None:
+        parts.append(f"category={category}")
+    if severity is not None:
+        parts.append(f"severity={severity}")
+    return ", ".join(parts) if parts else "none"
 
 
 def load_case_file(path: Path) -> list[Any]:

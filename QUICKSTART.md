@@ -40,7 +40,29 @@ Repeated runs help expose nondeterministic failures when you connect a real mode
 python3 runner/run_tests.py --runs 5
 ```
 
-## 5. Try A Real Adapter
+## 5. Run A Focused Subset
+
+Run all LLM02 disclosure cases:
+
+```bash
+python3 runner/run_tests.py --owasp LLM02
+```
+
+Run only canary-tagged cases:
+
+```bash
+python3 runner/run_tests.py --tag canary
+```
+
+Combine filters with repeated runs:
+
+```bash
+python3 runner/run_tests.py --owasp LLM02 --tag canary --runs 5
+```
+
+Filter matching is case-insensitive, but reports keep the original case values from the JSON files.
+
+## 6. Try A Real Adapter
 
 Ollama example:
 
@@ -59,10 +81,10 @@ python3 runner/run_tests.py --config config/openai.local.yaml
 
 Never commit real API keys, tokens, private prompts, customer records, or production retrieval documents.
 
-## 6. Read Results Carefully
+## 7. Read Results Carefully
 
 A pass means the response did not contain the configured failure indicators. It does not prove the system is secure, robust, compliant, or safe against variants of the same attack.
 
-## 7. CI Checks
+## 8. CI Checks
 
-Pull requests and pushes to `main` run GitHub Actions validation for JSON syntax, Python syntax, the default mock run, and a repeated mock run with `--runs 2`.
+Pull requests and pushes to `main` run GitHub Actions validation for JSON syntax, Python syntax, the default mock run, a repeated mock run with `--runs 2`, and a filtered mock run.

@@ -181,6 +181,11 @@ Checked-in examples:
 
 Read `docs/what_this_is_not.md` before treating results as evidence. This is not a full red-team platform, proof of security, compliance scanner, or replacement for human review.
 
+## Contributing And Security
+
+- Read [CONTRIBUTING.md](CONTRIBUTING.md) before adding cases, docs, or runner changes.
+- Read [SECURITY.md](SECURITY.md) before reporting sensitive concerns. Do not post real secrets, customer data, or private system details.
+
 ## Extending The Kit
 
 Good next additions are:

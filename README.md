@@ -172,9 +172,24 @@ Checked-in examples:
 - `sample_outputs/mock_failure_demo/` shows fake prompt-injection and disclosure failures for teaching
 - [Demo terminal output](docs/demo_terminal_output.md) shows example commands, terminal output, and artifact snippets
 
+## Demos
+
+- [LLM01 prompt injection demo](demos/llm01_prompt_injection_demo.md) walks through focused prompt-injection runs
+- [LLM02 sensitive disclosure demo](demos/llm02_sensitive_disclosure_demo.md) walks through focused disclosure runs
+- [YouTube demo outline](demos/youtube_demo_outline.md) provides a short public demo flow
+
 ## Boundaries
 
 Read `docs/what_this_is_not.md` before treating results as evidence. This is not a full red-team platform, proof of security, compliance scanner, or replacement for human review.
+
+## Course Paths
+
+Use the [course map](docs/course_map.md) to find the LLM01 prompt-injection path, the LLM02 sensitive-disclosure path, and the bonus automation path.
+
+## Contributing And Security
+
+- Read [CONTRIBUTING.md](CONTRIBUTING.md) before adding cases, docs, or runner changes.
+- Read [SECURITY.md](SECURITY.md) before reporting sensitive concerns. Do not post real secrets, customer data, or private system details.
 
 ## Extending The Kit
 

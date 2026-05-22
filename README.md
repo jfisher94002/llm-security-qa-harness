@@ -170,6 +170,7 @@ Checked-in examples:
 
 - `sample_outputs/mock_safe_run/` shows a default mock run with no failures
 - `sample_outputs/mock_failure_demo/` shows fake prompt-injection and disclosure failures for teaching
+- [Demo terminal output](docs/demo_terminal_output.md) shows example commands, terminal output, and artifact snippets
 
 ## Demos
 

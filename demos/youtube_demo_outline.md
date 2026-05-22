@@ -37,7 +37,7 @@ python3 runner/run_tests.py --owasp LLM02 --tag canary --output ./tmp_results/yo
 
 ```bash
 cat tmp_results/youtube_demo/summary.md
-head -n 5 tmp_results/youtube_demo/run_log.csv
+head -n 6 tmp_results/youtube_demo/run_log.csv
 cat tmp_results/youtube_demo/failures.json
 ```
 

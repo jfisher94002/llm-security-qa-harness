@@ -101,10 +101,12 @@ def main() -> None:
 
     write_reports(records, args.output, started_at)
     failed = sum(1 for record in records if not record["pass"])
-    print(
-        f"Ran {len(records)} case run(s) with adapter={records[0]['adapter'] if records else adapter.name}; "
-        f"{failed} failure(s). Reports written to {args.output}"
-    )
+    passed = len(records) - failed
+    adapter_name = records[0]["adapter"] if records else adapter.name
+    print(f"Ran {len(records)} case run(s) with adapter={adapter_name}.")
+    print(f"{passed} passed")
+    print(f"{failed} failures")
+    print(f"Reports written to {args.output}")
 
 
 def parse_args() -> argparse.Namespace:

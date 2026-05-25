@@ -9,11 +9,13 @@ from pathlib import Path
 from typing import Any
 
 try:
+    from .evaluators import EvaluationResult
     from .evaluators import evaluate_response
     from .evaluators import normalize_evaluator_config
     from .models import load_adapter
     from .reporting import utc_now, write_reports
 except ImportError:
+    from evaluators import EvaluationResult
     from evaluators import evaluate_response
     from evaluators import normalize_evaluator_config
     from models import load_adapter
@@ -22,6 +24,7 @@ except ImportError:
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CASE_DIR = ROOT / "test_cases"
 DEFAULT_OUTPUT_DIR = ROOT / "sample_outputs"
+DEMO_FAILURE_OUTPUT_DIR = ROOT / "sample_outputs" / "demo_failure_run"
 
 REQUIRED_FIELDS = {
     "id",
@@ -36,6 +39,11 @@ REQUIRED_FIELDS = {
 
 def main() -> None:
     args = parse_args()
+    if args.demo_failure and args.config is not None:
+        raise SystemExit("--demo-failure uses the built-in mock failure response; do not combine it with --config")
+    if args.demo_failure and args.output == DEFAULT_OUTPUT_DIR:
+        args.output = DEMO_FAILURE_OUTPUT_DIR
+
     cases = load_cases(args.cases)
     if not cases:
         raise SystemExit(f"{args.cases}: no test cases loaded")
@@ -58,6 +66,16 @@ def main() -> None:
         for repeat_index in range(1, args.runs + 1):
             response = adapter.generate(rendered_prompt)
             result = evaluate_response(response, case["evaluator"])
+            adapter_name = adapter.name
+            model_name = adapter.model
+            if args.demo_failure:
+                response = build_demo_failure_response(case)
+                result = EvaluationResult(
+                    passed=False,
+                    matched_indicators=list(case["evaluator"]["failure_indicators"]),
+                )
+                adapter_name = "mock-demo-failure"
+                model_name = "deterministic-failure-stub"
             records.append(
                 {
                     "run_id": run_id,
@@ -68,8 +86,8 @@ def main() -> None:
                     "title": case["title"],
                     "severity": case["severity"],
                     "repeat_index": repeat_index,
-                    "adapter": adapter.name,
-                    "model": adapter.model,
+                    "adapter": adapter_name,
+                    "model": model_name,
                     "pass": result.passed,
                     "evaluator_mode": case["evaluator"]["mode"],
                     "matched_indicators": result.matched_indicators,
@@ -84,7 +102,7 @@ def main() -> None:
     write_reports(records, args.output, started_at)
     failed = sum(1 for record in records if not record["pass"])
     print(
-        f"Ran {len(records)} case run(s) with adapter={adapter.name}; "
+        f"Ran {len(records)} case run(s) with adapter={records[0]['adapter'] if records else adapter.name}; "
         f"{failed} failure(s). Reports written to {args.output}"
     )
 
@@ -114,6 +132,14 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         default=None,
         help="Optional simple YAML adapter config. Defaults to mock adapter.",
+    )
+    parser.add_argument(
+        "--demo-failure",
+        action="store_true",
+        help=(
+            "Write deterministic mock failures for teaching demos. "
+            "Defaults output to sample_outputs/demo_failure_run."
+        ),
     )
     parser.add_argument(
         "--owasp",
@@ -287,6 +313,21 @@ def render_prompt(case: dict[str, Any]) -> str:
     except OSError as exc:
         raise SystemExit(f"{resolved}: could not read asset ({exc})") from None
     return prompt.replace("{asset_content}", asset_content)
+
+
+def build_demo_failure_response(case: dict[str, Any]) -> str:
+    indicators = case["evaluator"]["failure_indicators"]
+    joined_indicators = "\n".join(f"- {indicator}" for indicator in indicators)
+    return (
+        "DEMO FAILURE RESPONSE\n"
+        "This deterministic mock response intentionally includes the configured "
+        "failure indicator(s) for teaching and artifact review.\n\n"
+        f"Case: {case['id']} - {case['title']}\n"
+        "Matched indicator(s):\n"
+        f"{joined_indicators}\n\n"
+        "Do not treat this as a real model result. Use this mode to demonstrate "
+        "run_log.csv, failures.json, and summary.md failure reporting."
+    )
 
 
 def validate_asset_path(asset_path: Any, path: Path, index: int) -> None:

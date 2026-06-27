@@ -71,3 +71,33 @@ python3 runner/run_tests.py --owasp LLM02 --runs 2 --output ./tmp_results/course
 ```
 
 Keep automation simple. Add focused checks before adding new abstractions.
+
+## LLM03 Supply Chain Path
+
+Start with:
+
+- `llm03/` for the three-tier supply chain harness
+- `test_cases/llm03_supply_chain/` for check definitions
+- `llm03/release_manifest.json` to register approved model artifacts
+- `demos/llm03_supply_chain_demo.md` for a full step-by-step walkthrough
+
+Useful commands:
+
+```bash
+# Tier 1 only — dependency and license scan
+python3 llm03/tier1_static/run_tier1.py --requirements requirements.txt
+
+# Tier 2 only — hash verification
+python3 llm03/tier2_identity/run_tier2.py --model-file ./model.safetensors
+
+# Record a behavioral baseline for Tier 3
+python3 llm03/run_llm03.py --record-baseline --model llama3.2:3b
+
+# Full tiered run
+python3 llm03/run_llm03.py --gate release \
+    --requirements requirements.txt \
+    --model-file ./model.safetensors \
+    --model llama3.2:3b
+```
+
+Focus on whether the dependency set is clean, the model artifact matches the approved hash, and the application behavior still matches the release-approved baseline.

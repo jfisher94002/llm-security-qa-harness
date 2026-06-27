@@ -83,3 +83,48 @@ sample_outputs/         Example reports and demo outputs
 test_assets/            Fake source documents used by indirect tests
 test_cases/             JSON test cases grouped by OWASP category
 ```
+
+## LLM-03 Supply Chain Module
+
+The LLM-03 module runs three tiers of supply chain checks in order. It stops when an earlier tier fails so behavioral tests never run against an unverified artifact.
+
+| Tier | Layer | Checks | Stops on |
+|------|-------|--------|----------|
+| 1 | Static code | pip-audit, pip-licenses | Critical CVE or restricted license |
+| 2 | Asset identity | SHA-256 vs release manifest | Missing or mismatched hash |
+| 3 | Behavioral | Fixed prompts, temp 0, fresh sessions | Drift outside defined tolerance |
+
+### Quick Start — LLM-03
+
+```bash
+# Pre-merge: dependency and license scan only
+python3 llm03/run_llm03.py --gate pre-merge --requirements requirements.txt
+
+# Pre-deployment: add hash verification
+python3 llm03/run_llm03.py --gate pre-deploy \
+    --requirements requirements.txt \
+    --model-file ./your_model.safetensors
+
+# Release gate: full suite
+python3 llm03/run_llm03.py --gate release \
+    --requirements requirements.txt \
+    --model-file ./your_model.safetensors \
+    --model llama3.2:3b \
+    --baseline llm03/tier3_behavioral/baseline.json
+```
+
+See `demos/llm03_supply_chain_demo.md` for a full walkthrough.
+
+### LLM-03 Repository Layout
+
+```text
+llm03/
+  run_llm03.py              Tiered harness runner
+  release_manifest.json     Approved model artifact hashes
+  tier1_static/             Dependency and license checks
+  tier2_identity/           Hash verification
+  tier3_behavioral/         Behavioral regression (prompts, runner, comparator)
+  sample_outputs/           Artifact output directory
+test_cases/llm03_supply_chain/   JSON test case definitions
+demos/llm03_supply_chain_demo.md Full demo walkthrough
+```

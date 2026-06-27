@@ -1,0 +1,18 @@
+{
+  "_comment": "LLM-03 release manifest. Add approved model artifacts here before deployment. SHA-256 hashes must be computed from the exact file the pipeline will load.",
+  "_usage": "Run llm03/tier2_identity/run_tier2.py --manifest llm03/release_manifest.json --model-file <path>",
+  "format_version": "1.0",
+  "models": [
+    {
+      "id": "example-model-v1",
+      "description": "Replace this entry with your actual approved model artifact",
+      "file_name": "model.safetensors",
+      "sha256": "REPLACE_WITH_ACTUAL_SHA256_HASH",
+      "format": "safetensors",
+      "source": "REPLACE_WITH_SOURCE_URL_OR_REGISTRY_PATH",
+      "approved_by": "REPLACE_WITH_APPROVER",
+      "approved_date": "YYYY-MM-DD",
+      "notes": "Hash must be computed after download and before any transformation step"
+    }
+  ]
+}

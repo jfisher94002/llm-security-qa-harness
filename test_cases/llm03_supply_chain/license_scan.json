@@ -1,0 +1,20 @@
+{
+  "id": "llm03-license-scan-001",
+  "owasp_id": "LLM03",
+  "category": "supply_chain",
+  "tier": 1,
+  "check_type": "license_scan",
+  "title": "License audit: restricted license in production dependency",
+  "severity": "high",
+  "tool": "pip-licenses",
+  "fail_signal": "GPL or AGPL license detected in a production dependency without documented approval",
+  "pass_criteria": "All production dependencies on approved license list",
+  "expected_safe_behavior": "pip-licenses output contains no restricted licenses in the production stack",
+  "evidence_to_capture": [
+    "Full pip-licenses report",
+    "Package name and detected license",
+    "Whether the package is in the production or dev dependency set"
+  ],
+  "restricted_licenses": ["GPL-2.0", "GPL-3.0", "AGPL-3.0"],
+  "tags": ["license", "pip-licenses", "compliance", "tier1"]
+}

@@ -4,12 +4,15 @@ A practical starter kit for repeatable LLM security QA checks focused on:
 
 - **OWASP LLM01: Prompt Injection**
 - **OWASP LLM02: Sensitive Information Disclosure**
+- **OWASP LLM03: Supply Chain Testing**
 
-The harness loads JSON test cases from a directory, runs each case one or more times against a model adapter, applies basic string-matching evaluators, and writes CSV/JSON/Markdown reports.
+> Passing these tests does **not** prove an application, prompt, model, retrieval system, or agent is secure. It only means the configured checks did not detect the defined failure conditions under the tested circumstances.
 
-> Passing these tests does **not** prove an application, prompt, model, retrieval system, or agent is secure. It only means the configured failure strings were not observed in the sampled responses for this run.
+---
 
 ## What Is Included
+
+### LLM01 and LLM02 — Behavioral Test Runner
 
 - Directory-based JSON test cases for LLM01 and LLM02
 - Fake but realistic poisoned documents and sensitive-looking test assets
@@ -20,7 +23,18 @@ The harness loads JSON test cases from a directory, runs each case one or more t
 - Repeated runs per test case
 - Reports written to `sample_outputs/run_log.csv`, `sample_outputs/failures.json`, and `sample_outputs/summary.md`
 
-## Quick Run
+### LLM03 — Three-Tier Supply Chain Harness
+
+- Tier 1: pip-audit dependency scan and pip-licenses compliance check
+- Tier 2: SHA-256 hash verification against a release manifest
+- Tier 3: Fixed-prompt behavioral regression with baseline comparison
+- Tiered runner that stops at the first failed tier
+- Release manifest template for approved model artifact hashes
+- Gate modes for pre-merge, pre-deployment, and full release
+
+---
+
+## Quick Run — LLM01 and LLM02
 
 Default safe run:
 
@@ -46,8 +60,6 @@ This mode intentionally injects each test case's configured failure indicators a
 sample_outputs/demo_failure_run
 ```
 
-Use this for videos, screenshots, and teaching workflows where you want realistic `failures.json` and report evidence without needing a vulnerable model.
-
 Run a focused subset:
 
 ```bash
@@ -72,21 +84,11 @@ python3 runner/run_tests.py --config config/openai.example.yaml
 
 The default mock adapter is intentionally conservative and does not need network access, API keys, Ollama, or third-party packages.
 
-## Repository Layout
+---
 
-```text
-config/                 Example adapter configs
-docs/                   QA workflow and evaluator notes
-runner/                 Python harness implementation
-demos/                  Demo walkthrough scripts
-sample_outputs/         Example reports and demo outputs
-test_assets/            Fake source documents used by indirect tests
-test_cases/             JSON test cases grouped by OWASP category
-```
+## Quick Run — LLM03 Supply Chain
 
-## LLM-03 Supply Chain Module
-
-The LLM-03 module runs three tiers of supply chain checks in order. It stops when an earlier tier fails so behavioral tests never run against an unverified artifact.
+The LLM-03 harness runs three tiers in order and stops when an earlier tier fails. Behavioral tests never run against an unverified artifact.
 
 | Tier | Layer | Checks | Stops on |
 |------|-------|--------|----------|
@@ -94,13 +96,11 @@ The LLM-03 module runs three tiers of supply chain checks in order. It stops whe
 | 2 | Asset identity | SHA-256 vs release manifest | Missing or mismatched hash |
 | 3 | Behavioral | Fixed prompts, temp 0, fresh sessions | Drift outside defined tolerance |
 
-### Quick Start — LLM-03
-
 ```bash
 # Pre-merge: dependency and license scan only
 python3 llm03/run_llm03.py --gate pre-merge --requirements requirements.txt
 
-# Pre-deployment: add hash verification
+# Pre-deployment: Tier 1 + Tier 2
 python3 llm03/run_llm03.py --gate pre-deploy \
     --requirements requirements.txt \
     --model-file ./your_model.safetensors
@@ -111,20 +111,33 @@ python3 llm03/run_llm03.py --gate release \
     --model-file ./your_model.safetensors \
     --model llama3.2:3b \
     --baseline llm03/tier3_behavioral/baseline.json
+
+# Record a behavioral baseline
+python3 llm03/run_llm03.py --record-baseline --model llama3.2:3b
 ```
 
-See `demos/llm03_supply_chain_demo.md` for a full walkthrough.
+See `demos/llm03_supply_chain_demo.md` for a full step-by-step walkthrough.
 
-### LLM-03 Repository Layout
+---
+
+## Repository Layout
 
 ```text
+config/                          Example adapter configs (LLM01/02)
+docs/                            QA workflow and evaluator notes
+runner/                          Python harness for LLM01/02
+demos/                           Demo walkthrough scripts
+sample_outputs/                  Example reports and demo outputs
+test_assets/                     Fake source documents for indirect tests
+test_cases/
+  llm01_prompt_injection/        LLM01 test case JSON files
+  llm02_sensitive_disclosure/    LLM02 test case JSON files
+  llm03_supply_chain/            LLM03 check definitions
 llm03/
-  run_llm03.py              Tiered harness runner
-  release_manifest.json     Approved model artifact hashes
-  tier1_static/             Dependency and license checks
-  tier2_identity/           Hash verification
-  tier3_behavioral/         Behavioral regression (prompts, runner, comparator)
-  sample_outputs/           Artifact output directory
-test_cases/llm03_supply_chain/   JSON test case definitions
-demos/llm03_supply_chain_demo.md Full demo walkthrough
+  run_llm03.py                   Tiered harness runner
+  release_manifest.json          Approved model artifact hashes
+  tier1_static/                  Dependency and license checks
+  tier2_identity/                Hash verification
+  tier3_behavioral/              Behavioral regression (prompts, runner, comparator)
+  sample_outputs/                LLM03 artifact output directory
 ```

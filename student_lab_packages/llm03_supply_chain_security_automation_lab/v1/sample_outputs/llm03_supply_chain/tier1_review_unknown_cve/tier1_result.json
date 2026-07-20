@@ -1,0 +1,18 @@
+{
+  "tier": 1,
+  "name": "static_checks",
+  "result": "review_required",
+  "exit_code": 1,
+  "timestamp": "2026-07-20T18:42:59.715352+00:00",
+  "dependency_findings": 1,
+  "dependency_warnings": 0,
+  "dependency_review_items": 1,
+  "dependency_hard_blocks": 0,
+  "restricted_license_findings": 0,
+  "license_review_items": 0,
+  "review_gate": "sample_outputs/llm03_supply_chain/tier1_review_unknown_cve/review_gate.json",
+  "artifacts": {
+    "dependency_scan": "sample_outputs/llm03_supply_chain/tier1_review_unknown_cve/dep_scan.json",
+    "license_scan": "sample_outputs/llm03_supply_chain/tier1_review_unknown_cve/license_scan.json"
+  }
+}

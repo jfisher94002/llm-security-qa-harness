@@ -1,0 +1,16 @@
+{
+  "dependencies": [
+    {
+      "name": "critical-demo-lib",
+      "version": "1.2.3",
+      "vulns": [
+        {
+          "id": "CVE-2099-0001",
+          "aliases": [],
+          "fix_versions": ["1.2.4"],
+          "description": "Fake critical dependency finding that should hard-block the gate."
+        }
+      ]
+    }
+  ]
+}

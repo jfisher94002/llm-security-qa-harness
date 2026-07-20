@@ -1,0 +1,15 @@
+{
+  "record_type": "approval_record",
+  "approval_category": "supplier_terms_change",
+  "decision": "approved_after_review",
+  "timestamp": "2026-01-16T00:00:00+00:00",
+  "approver": "QA Security Training Board",
+  "ticket": "TRAINING-LLM03-TERMS-002",
+  "supplier": "Example Model Registry",
+  "change_summary": "Fake supplier terms changed the retention window for training telemetry from 0 days to 7 days.",
+  "reason": "Approved only for the fake course scenario after confirming no production prompts, customer data, or private retrieval assets are sent.",
+  "expiration": "2026-04-16",
+  "evidence": [
+    "sample_outputs/llm03_supply_chain/review_examples/review_gate.json"
+  ]
+}

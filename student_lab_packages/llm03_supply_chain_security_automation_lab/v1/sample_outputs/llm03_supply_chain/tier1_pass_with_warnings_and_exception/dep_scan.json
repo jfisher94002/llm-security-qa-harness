@@ -1,0 +1,48 @@
+{
+  "check": "dependency_scan",
+  "tool": "pip-audit",
+  "requirements_file": "requirements.txt",
+  "source": "llm03/fixtures/tier1/pip_audit_noncritical.json",
+  "policy_file": "llm03/policies/vulnerability_severity.json",
+  "timestamp": "2026-07-20T18:42:59.714529+00:00",
+  "pip_audit_exit_code": 0,
+  "findings": [
+    {
+      "package": "teaching-helper",
+      "installed_version": "2.4.0",
+      "vuln_id": "CVE-2099-0002",
+      "aliases": [
+        "CVE-2099-0002",
+        "PYSEC-2099-0003"
+      ],
+      "mapped_severity": "medium",
+      "mapped_by": "CVE-2099-0002",
+      "disposition": "warning",
+      "fix_versions": [
+        "2.4.1"
+      ],
+      "description": "Fake medium-severity dependency finding for warning evidence."
+    }
+  ],
+  "warnings": [
+    {
+      "package": "teaching-helper",
+      "installed_version": "2.4.0",
+      "vuln_id": "CVE-2099-0002",
+      "aliases": [
+        "CVE-2099-0002",
+        "PYSEC-2099-0003"
+      ],
+      "mapped_severity": "medium",
+      "mapped_by": "CVE-2099-0002",
+      "disposition": "warning",
+      "fix_versions": [
+        "2.4.1"
+      ],
+      "description": "Fake medium-severity dependency finding for warning evidence."
+    }
+  ],
+  "review_required": [],
+  "hard_blocks": [],
+  "raw_output": "loaded fixture: llm03/fixtures/tier1/pip_audit_noncritical.json"
+}

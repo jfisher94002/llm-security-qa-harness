@@ -21,8 +21,11 @@ jobs:
         with:
           python-version: "3.10"
 
+      - name: Install dependencies
+        run: python3 -m pip install -r requirements.txt
+
       - name: Check Python syntax
-        run: python3 -m compileall runner
+        run: python3 -m compileall runner llm03
 
       - name: Validate repository JSON
         run: |
@@ -53,3 +56,6 @@ jobs:
           test -s sample_outputs/run_log.csv
           test -s sample_outputs/failures.json
           test -s sample_outputs/summary.md
+
+      - name: Run LLM03 offline tests
+        run: python3 -m unittest discover -s tests -v

@@ -1,0 +1,42 @@
+{
+  "check": "license_scan",
+  "tool": "target_license_inventory",
+  "inventory_source": "fake target Python environment with approved course exception",
+  "inventory_metadata": {
+    "source": "fake target Python environment with approved course exception",
+    "generated_at": "2026-01-15T00:00:00+00:00",
+    "requirements_file": "requirements.txt",
+    "requirements_sha256": "b6a4be4fccc91fae2be8d5bbcfdf5735d4a061d1f8a9b56c24bee52bcf81293f",
+    "generator": "llm03/tier1_static/generate_license_inventory.py",
+    "python_version": "3.10.0"
+  },
+  "exceptions_file": "llm03/policies/license_exceptions.json",
+  "timestamp": "2026-07-20T18:42:59.714584+00:00",
+  "total_packages": 1,
+  "restricted_findings": [
+    {
+      "package": "gpl-helper-demo",
+      "version": "0.3.0",
+      "license": "GPL-3.0-only",
+      "disposition": "exception_approved",
+      "exception": {
+        "package": "gpl-helper-demo",
+        "version": "0.3.0",
+        "license": "GPL-3.0-only",
+        "approver": "QA Security Training Board",
+        "reason": "Fake package used in an isolated course fixture; not approved for production use.",
+        "ticket": "TRAINING-LLM03-001",
+        "expiration": "2099-12-31"
+      },
+      "exception_status": "valid exception"
+    }
+  ],
+  "restricted_licenses_checked": [
+    "AGPL-3.0",
+    "AGPL-3.0-only",
+    "GPL-2.0",
+    "GPL-2.0-only",
+    "GPL-3.0",
+    "GPL-3.0-only"
+  ]
+}

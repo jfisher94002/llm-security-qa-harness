@@ -1,0 +1,18 @@
+{
+  "record_type": "approval_record",
+  "approval_category": "license_exception",
+  "decision": "approved_for_training_fixture_only",
+  "timestamp": "2026-01-16T00:00:00+00:00",
+  "approver": "QA Security Training Board",
+  "ticket": "TRAINING-LLM03-001",
+  "scope": {
+    "package": "gpl-helper-demo",
+    "version": "0.3.0",
+    "license": "GPL-3.0-only"
+  },
+  "reason": "Fake package appears only in offline training evidence and is not approved for production use.",
+  "expiration": "2099-12-31",
+  "evidence": [
+    "sample_outputs/llm03_supply_chain/tier1_pass_with_license_exception/license_scan.json"
+  ]
+}

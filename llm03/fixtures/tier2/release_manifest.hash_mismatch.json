@@ -1,0 +1,15 @@
+{
+  "format_version": "1.0",
+  "description": "Fake release manifest with an intentional hash mismatch.",
+  "models": [
+    {
+      "id": "fake-course-artifact-v1",
+      "file_name": "approved_artifact.txt",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "format": "text-fixture",
+      "source": "local teaching fixture",
+      "approved_by": "QA Security Training Board",
+      "approved_date": "2026-01-15"
+    }
+  ]
+}

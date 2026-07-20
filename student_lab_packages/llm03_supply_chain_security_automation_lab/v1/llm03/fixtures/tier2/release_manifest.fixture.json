@@ -1,0 +1,19 @@
+{
+  "format_version": "1.0",
+  "description": "Fake release manifest for offline LLM-03 Tier 2 tests.",
+  "models": [
+    {
+      "id": "fake-course-artifact-v1",
+      "description": "Tiny fake artifact used for SHA-256 and signature verification exercises.",
+      "file_name": "approved_artifact.txt",
+      "sha256": "439bf62f141b6f7960c19b173b73bcd22274765fc20f8f69ce4766974b198d66",
+      "format": "text-fixture",
+      "source": "local teaching fixture",
+      "approved_by": "QA Security Training Board",
+      "approved_date": "2026-01-15",
+      "ed25519_public_key": "712651f450ba05b63898b99ef5f7ba45632e8e2527f7f715cd671ec4024cc51e",
+      "signature_file": "llm03/fixtures/tier2/approved_artifact.sig",
+      "notes": "Fake data only; not a model artifact."
+    }
+  ]
+}

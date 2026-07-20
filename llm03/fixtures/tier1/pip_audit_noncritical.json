@@ -1,0 +1,16 @@
+{
+  "dependencies": [
+    {
+      "name": "teaching-helper",
+      "version": "2.4.0",
+      "vulns": [
+        {
+          "id": "CVE-2099-0002",
+          "aliases": ["PYSEC-2099-0003"],
+          "fix_versions": ["2.4.1"],
+          "description": "Fake medium-severity dependency finding for warning evidence."
+        }
+      ]
+    }
+  ]
+}

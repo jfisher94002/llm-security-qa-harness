@@ -1,0 +1,15 @@
+{
+  "format_version": "1.0",
+  "description": "Teaching-only restricted-license exceptions. Use fake package data only.",
+  "exceptions": [
+    {
+      "package": "gpl-helper-demo",
+      "version": "0.3.0",
+      "license": "GPL-3.0-only",
+      "approver": "QA Security Training Board",
+      "reason": "Fake package used in an isolated course fixture; not approved for production use.",
+      "ticket": "TRAINING-LLM03-001",
+      "expiration": "2099-12-31"
+    }
+  ]
+}

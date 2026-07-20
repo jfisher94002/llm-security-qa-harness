@@ -1,0 +1,46 @@
+{
+  "check": "dependency_scan",
+  "tool": "pip-audit",
+  "requirements_file": "requirements.txt",
+  "source": "llm03/fixtures/tier1/pip_audit_critical.json",
+  "policy_file": "llm03/policies/vulnerability_severity.json",
+  "timestamp": "2026-07-20T18:43:30.118266+00:00",
+  "pip_audit_exit_code": 0,
+  "findings": [
+    {
+      "package": "critical-demo-lib",
+      "installed_version": "1.2.3",
+      "vuln_id": "CVE-2099-0001",
+      "aliases": [
+        "CVE-2099-0001"
+      ],
+      "mapped_severity": "critical",
+      "mapped_by": "CVE-2099-0001",
+      "disposition": "hard_block",
+      "fix_versions": [
+        "1.2.4"
+      ],
+      "description": "Fake critical dependency finding that should hard-block the gate."
+    }
+  ],
+  "warnings": [],
+  "review_required": [],
+  "hard_blocks": [
+    {
+      "package": "critical-demo-lib",
+      "installed_version": "1.2.3",
+      "vuln_id": "CVE-2099-0001",
+      "aliases": [
+        "CVE-2099-0001"
+      ],
+      "mapped_severity": "critical",
+      "mapped_by": "CVE-2099-0001",
+      "disposition": "hard_block",
+      "fix_versions": [
+        "1.2.4"
+      ],
+      "description": "Fake critical dependency finding that should hard-block the gate."
+    }
+  ],
+  "raw_output": "loaded fixture: llm03/fixtures/tier1/pip_audit_critical.json"
+}

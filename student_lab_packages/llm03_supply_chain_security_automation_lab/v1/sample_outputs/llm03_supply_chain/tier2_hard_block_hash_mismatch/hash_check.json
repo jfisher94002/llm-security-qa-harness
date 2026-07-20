@@ -1,0 +1,20 @@
+{
+  "check": "asset_identity",
+  "tool": "hashlib sha256 + cryptography Ed25519 verification",
+  "timestamp": "2026-07-20T18:43:14.391247+00:00",
+  "model_file": "llm03/fixtures/tier2/approved_artifact.txt",
+  "file_name": "approved_artifact.txt",
+  "file_size_bytes": 27,
+  "actual_hash": "439bf62f141b6f7960c19b173b73bcd22274765fc20f8f69ce4766974b198d66",
+  "expected_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "manifest_entry_found": true,
+  "hash_match": false,
+  "signature": {
+    "configured": false,
+    "verified": null,
+    "signature_file": null,
+    "public_key_source": null
+  },
+  "result": "HARD_BLOCK_HASH_MISMATCH",
+  "exit_code": 2
+}

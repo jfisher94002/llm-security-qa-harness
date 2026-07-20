@@ -1,0 +1,18 @@
+{
+  "tier": 1,
+  "name": "static_checks",
+  "result": "passed",
+  "exit_code": 0,
+  "timestamp": "2026-07-20T18:42:59.715405+00:00",
+  "dependency_findings": 1,
+  "dependency_warnings": 1,
+  "dependency_review_items": 0,
+  "dependency_hard_blocks": 0,
+  "restricted_license_findings": 1,
+  "license_review_items": 0,
+  "review_gate": null,
+  "artifacts": {
+    "dependency_scan": "sample_outputs/llm03_supply_chain/tier1_pass_with_warnings_and_exception/dep_scan.json",
+    "license_scan": "sample_outputs/llm03_supply_chain/tier1_pass_with_warnings_and_exception/license_scan.json"
+  }
+}

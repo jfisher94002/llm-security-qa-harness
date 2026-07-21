@@ -92,13 +92,21 @@ def validate_response_artifact(path, label):
     results = artifact.get("results")
     if not isinstance(results, list):
         return f"{label} artifact results must be an array"
+    if not results:
+        return f"{label} artifact results must not be empty"
+    seen_ids = set()
     for index, item in enumerate(results):
         if not isinstance(item, dict):
             return f"{label} artifact results[{index}] must be an object"
         if not isinstance(item.get("id"), str) or not item["id"].strip():
             return f"{label} artifact results[{index}].id must be a non-empty string"
+        if item["id"] in seen_ids:
+            return f"{label} artifact contains duplicate response id: {item['id']}"
+        seen_ids.add(item["id"])
         if not isinstance(item.get("response"), str):
             return f"{label} artifact results[{index}].response must be a string"
+        if not item["response"].strip():
+            return f"{label} artifact results[{index}].response must be a non-empty string"
     return None
 
 

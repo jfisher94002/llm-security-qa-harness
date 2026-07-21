@@ -136,6 +136,8 @@ Install dependencies before live LLM03 scans, probes, or Tier 2 signature checks
 python3 -m pip install -r requirements.txt
 ```
 
+For live Tier 1 license evidence, install this repository's `requirements.txt` only in the lab-tools environment. Install the application dependencies in a separate target environment from `TARGET_REQUIREMENTS=/path/to/application/requirements.txt`, then pass the same file to `generate_license_inventory.py --requirements` and `run_llm03.py --requirements`.
+
 Exit codes are:
 
 - `0` passed, including recorded non-critical CVE warnings

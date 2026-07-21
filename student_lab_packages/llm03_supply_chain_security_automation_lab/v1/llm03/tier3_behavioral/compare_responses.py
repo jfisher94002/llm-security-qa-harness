@@ -79,7 +79,11 @@ def similarity_score(baseline_response, current_response):
 
 def require_string_list(prompt_def, field):
     values = prompt_def.get(field, [])
-    if not isinstance(values, list) or any(not isinstance(item, str) or not item for item in values):
+    if (
+        not isinstance(values, list)
+        or not values
+        or any(not isinstance(item, str) or not item.strip() for item in values)
+    ):
         raise ValueError(f"prompt {prompt_def.get('id')}.{field} must be a list of non-empty strings")
     return values
 
@@ -136,6 +140,8 @@ def validate_result_artifact(data, label):
         response = entry.get("response")
         if not isinstance(response, str):
             raise ValueError(f"{label}.results[{index}].response must be a string")
+        if not response.strip():
+            raise ValueError(f"{label}.results[{index}].response must be a non-empty string")
         result_map[entry_id] = entry
     return result_map
 

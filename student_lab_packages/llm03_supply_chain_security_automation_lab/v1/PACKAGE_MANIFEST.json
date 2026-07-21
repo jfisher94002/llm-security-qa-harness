@@ -9,8 +9,8 @@
   "payload": [
     {
       "path": "v1/QUICKSTART.md",
-      "sha256": "57613f7a3f79cadf04cafc7834cbb38a57ec14602d69aea5b3a8505ac57bd52f",
-      "size_bytes": 1985
+      "sha256": "9e2bd1a54d317124b06b64400d5067c8f4fb315f0b4cc0ed0d5cd046423e5914",
+      "size_bytes": 2866
     },
     {
       "path": "v1/README.md",
@@ -19,13 +19,13 @@
     },
     {
       "path": "v1/demos/llm03_supply_chain_demo.md",
-      "sha256": "6c23cb1294e776622ab0f26ab96ae48e7277e6368c571a89f34f9476ee823243",
-      "size_bytes": 7695
+      "sha256": "49a894038bb83efd34fedc00ca50e0eec83103dbc0c101d92ec39a849e462a59",
+      "size_bytes": 8039
     },
     {
       "path": "v1/docs/llm03_results_interpretation.md",
-      "sha256": "929ba0f295566fbfa712c6e04af84bab1fc3a208bf5de887de003b194a4602f0",
-      "size_bytes": 5603
+      "sha256": "1c056fce9f3a05a190c694876ce8533557b99c7f9caba6ba26af61f63604548a",
+      "size_bytes": 5989
     },
     {
       "path": "v1/llm03/fixtures/tier1/license_exceptions_expired.json",
@@ -129,13 +129,13 @@
     },
     {
       "path": "v1/llm03/run_llm03.py",
-      "sha256": "c1c65ab92b6669558e39e3c5941655cc81f29817c5d5fccb2d7fa48b7227afc3",
-      "size_bytes": 15147
+      "sha256": "17ab6a9ab3e43ffbfecc84e516beaeb6bac986e7eaa3fcf477744a078c97bf21",
+      "size_bytes": 15534
     },
     {
       "path": "v1/llm03/tier1_static/generate_license_inventory.py",
-      "sha256": "15d7e666103ab1a2988a2ef6fe9c6f5bdd30c83207dd2db4ec348ddd9f129348",
-      "size_bytes": 4992
+      "sha256": "db9286a70fb2ceaecf4b96a39cef1220c1e31037374acab4adc816cfb7d0d418",
+      "size_bytes": 6175
     },
     {
       "path": "v1/llm03/tier1_static/run_tier1.py",
@@ -149,8 +149,8 @@
     },
     {
       "path": "v1/llm03/tier3_behavioral/compare_responses.py",
-      "sha256": "d50d60ac8e0cbcb7f758ab3a5939668773455f842ba7cbf28130f4adb518d3b3",
-      "size_bytes": 10174
+      "sha256": "fe1953260d44d1e6cd9e52fe384f3aea3c13874033d92f9d3cf93cd63ca7bdb4",
+      "size_bytes": 10355
     },
     {
       "path": "v1/llm03/tier3_behavioral/prompts.json",
@@ -159,8 +159,8 @@
     },
     {
       "path": "v1/llm03/tier3_behavioral/run_probes.py",
-      "sha256": "10362b3a073c556b8629064536c791ff51924098308bc5574da4bffd56d3e1f8",
-      "size_bytes": 3408
+      "sha256": "65d39231d1aa3eda3f61e9bc7ab301bf0045b1a2c37f20651fd069958fad1675",
+      "size_bytes": 3905
     },
     {
       "path": "v1/requirements.txt",
@@ -379,8 +379,8 @@
     },
     {
       "path": "v1/tests/test_llm03_supply_chain.py",
-      "sha256": "6584b30fbcb62e681d1db2b89ac45cba92f4928807d4e9d19511c45693555c14",
-      "size_bytes": 46039
+      "sha256": "1e588fb464cb36522dddd1f300f8c05d4ddc5fca1ed9add7830cb14dd8db9437",
+      "size_bytes": 54405
     }
   ]
 }

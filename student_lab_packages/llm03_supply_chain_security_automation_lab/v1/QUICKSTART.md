@@ -31,22 +31,50 @@ python3 llm03/run_llm03.py --gate pre-deploy \
     --output ./tmp_results/llm03-pre-deploy
 ```
 
-For live license inventory generation, use two environments: a lab-tools environment with this package and scanners installed, and a separate target environment containing only the application dependencies being evaluated. Example on macOS/Linux:
+For live license inventory generation, use two environments: a lab-tools environment with this package and scanners installed, and a separate target environment containing only the application dependencies being evaluated. The target environment installs the application requirements file, not this package requirements file.
+
+macOS/Linux:
 
 ```bash
+TARGET_REQUIREMENTS=/path/to/application/requirements.txt
+
 python3 -m venv .venv-llm03-tools
 source .venv-llm03-tools/bin/activate
 python3 -m pip install -r requirements.txt
 
 python3 -m venv .venv-llm03-target
-.venv-llm03-target/bin/python -m pip install -r requirements.txt
+.venv-llm03-target/bin/python -m pip install -r "$TARGET_REQUIREMENTS"
 
 python3 llm03/tier1_static/generate_license_inventory.py \
-    --requirements requirements.txt \
+    --requirements "$TARGET_REQUIREMENTS" \
     --target-python .venv-llm03-target/bin/python \
     --output target_license_inventory.json
+
+python3 llm03/run_llm03.py --gate pre-merge \
+    --requirements "$TARGET_REQUIREMENTS" \
+    --license-inventory-json target_license_inventory.json
 ```
 
-On Windows PowerShell, activate `.venv-llm03-tools` and pass `.\.venv-llm03-target\Scripts\python.exe` to `--target-python`.
+Windows PowerShell:
+
+```powershell
+$TARGET_REQUIREMENTS = "C:\path\to\application\requirements.txt"
+
+py -3.10 -m venv .venv-llm03-tools
+.\.venv-llm03-tools\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+
+py -3.10 -m venv .venv-llm03-target
+.\.venv-llm03-target\Scripts\python.exe -m pip install -r $TARGET_REQUIREMENTS
+
+python llm03\tier1_static\generate_license_inventory.py `
+    --requirements $TARGET_REQUIREMENTS `
+    --target-python .\.venv-llm03-target\Scripts\python.exe `
+    --output target_license_inventory.json
+
+python llm03\run_llm03.py --gate pre-merge `
+    --requirements $TARGET_REQUIREMENTS `
+    --license-inventory-json target_license_inventory.json
+```
 
 Tier 3 prompts include per-prompt `baseline_similarity_threshold` values. A prompt passes only when its rule check passes and its current response remains similar enough to the approved baseline.

@@ -8,7 +8,7 @@ This demo covers the three-tier supply chain harness for LLM-03. Each tier cover
 - a lab-tools environment with `cryptography`, `requests`, `pip-audit`, and `pip-licenses` installed with `python3 -m pip install -r requirements.txt`
 - a separate target environment containing only the application dependencies being evaluated
 - Ollama running locally with at least one model pulled (for Tier 3)
-- A requirements file and target license inventory to scan (Tier 1 live mode)
+- The application's own requirements file and target license inventory to scan (Tier 1 live mode)
 - A model file to verify (Tier 2, optional for walkthrough)
 
 ## Tier 1: Static Code Checks
@@ -26,7 +26,7 @@ python3 llm03/tier1_static/run_tier1.py \
 
 # Live scan against a target dependency inventory
 python3 llm03/tier1_static/run_tier1.py \
-    --requirements requirements.txt \
+    --requirements "$TARGET_REQUIREMENTS" \
     --license-inventory-json ./target_license_inventory.json \
     --output ./tmp_results/tier1
 ```
@@ -36,15 +36,17 @@ python3 llm03/tier1_static/run_tier1.py \
 macOS/Linux:
 
 ```bash
+TARGET_REQUIREMENTS=/path/to/application/requirements.txt
+
 python3 -m venv .venv-llm03-tools
 source .venv-llm03-tools/bin/activate
 python3 -m pip install -r requirements.txt
 
 python3 -m venv .venv-llm03-target
-.venv-llm03-target/bin/python -m pip install -r requirements.txt
+.venv-llm03-target/bin/python -m pip install -r "$TARGET_REQUIREMENTS"
 
 python3 llm03/tier1_static/generate_license_inventory.py \
-    --requirements requirements.txt \
+    --requirements "$TARGET_REQUIREMENTS" \
     --target-python .venv-llm03-target/bin/python \
     --output target_license_inventory.json
 ```
@@ -52,20 +54,22 @@ python3 llm03/tier1_static/generate_license_inventory.py \
 Windows PowerShell:
 
 ```powershell
+$TARGET_REQUIREMENTS = "C:\path\to\application\requirements.txt"
+
 py -3.10 -m venv .venv-llm03-tools
 .\.venv-llm03-tools\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
 
 py -3.10 -m venv .venv-llm03-target
-.\.venv-llm03-target\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv-llm03-target\Scripts\python.exe -m pip install -r $TARGET_REQUIREMENTS
 
 python llm03\tier1_static\generate_license_inventory.py `
-    --requirements requirements.txt `
+    --requirements $TARGET_REQUIREMENTS `
     --target-python .\.venv-llm03-target\Scripts\python.exe `
     --output target_license_inventory.json
 ```
 
-The scanner runs from the lab-tools environment and inspects the target Python environment, so the inventory does not include `pip-licenses` merely because the scanner is installed.
+The scanner runs from the lab-tools environment and inspects the target Python environment, so the inventory does not include `pip-licenses` merely because the scanner is installed. Pass the same application requirements file to `generate_license_inventory.py --requirements` and `run_llm03.py --requirements`.
 
 ### Fail signal
 - A mapped Critical CVE is a hard block
@@ -189,6 +193,7 @@ python3 llm03/run_llm03.py --gate pre-deploy \
 ```bash
 python3 llm03/run_llm03.py --gate release \
     --pip-audit-json llm03/fixtures/tier1/pip_audit_pass.json \
+    --requirements "$TARGET_REQUIREMENTS" \
     --license-inventory-json ./target_license_inventory.json \
     --model-file ./your_model.safetensors \
     --model llama3.2:3b \

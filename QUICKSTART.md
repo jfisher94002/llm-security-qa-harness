@@ -115,3 +115,49 @@ python3 llm03/run_llm03.py --gate pre-deploy \
 ```
 
 Use `docs/llm03_results_interpretation.md` to read `gate_result.json`, `review_gate.json`, and the tier evidence.
+
+Live Tier 1 license inventory uses two environments. The lab-tools environment installs this repository's `requirements.txt`; the target environment installs the application's own requirements file:
+
+macOS/Linux:
+
+```bash
+TARGET_REQUIREMENTS=/path/to/application/requirements.txt
+
+python3 -m venv .venv-llm03-tools
+source .venv-llm03-tools/bin/activate
+python3 -m pip install -r requirements.txt
+
+python3 -m venv .venv-llm03-target
+.venv-llm03-target/bin/python -m pip install -r "$TARGET_REQUIREMENTS"
+
+python3 llm03/tier1_static/generate_license_inventory.py \
+    --requirements "$TARGET_REQUIREMENTS" \
+    --target-python .venv-llm03-target/bin/python \
+    --output target_license_inventory.json
+
+python3 llm03/run_llm03.py --gate pre-merge \
+    --requirements "$TARGET_REQUIREMENTS" \
+    --license-inventory-json target_license_inventory.json
+```
+
+Windows PowerShell:
+
+```powershell
+$TARGET_REQUIREMENTS = "C:\path\to\application\requirements.txt"
+
+py -3.10 -m venv .venv-llm03-tools
+.\.venv-llm03-tools\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+
+py -3.10 -m venv .venv-llm03-target
+.\.venv-llm03-target\Scripts\python.exe -m pip install -r $TARGET_REQUIREMENTS
+
+python llm03\tier1_static\generate_license_inventory.py `
+    --requirements $TARGET_REQUIREMENTS `
+    --target-python .\.venv-llm03-target\Scripts\python.exe `
+    --output target_license_inventory.json
+
+python llm03\run_llm03.py --gate pre-merge `
+    --requirements $TARGET_REQUIREMENTS `
+    --license-inventory-json target_license_inventory.json
+```

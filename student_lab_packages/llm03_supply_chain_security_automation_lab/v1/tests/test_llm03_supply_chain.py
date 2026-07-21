@@ -4,6 +4,7 @@ import json
 import subprocess
 import sys
 import tempfile
+import types
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -349,6 +350,8 @@ class Llm03Tier1Tests(unittest.TestCase):
 
         def fake_run(cmd, **kwargs):
             calls.append(cmd)
+            if cmd[1:] == ["--version"]:
+                return subprocess.CompletedProcess(cmd, 0, stdout="Python 3.11.9\n", stderr="")
             stdout = json.dumps([
                 {"Name": "target-only-package", "Version": "1.0.0", "License": "MIT"}
             ])
@@ -368,11 +371,27 @@ class Llm03Tier1Tests(unittest.TestCase):
                 with self.assertRaises(SystemExit) as cm:
                     module.main()
             self.assertEqual(cm.exception.code, 0)
-            self.assertIn("--python", calls[0])
-            self.assertIn(sys.executable, calls[0])
+            pip_license_call = [cmd for cmd in calls if cmd[0] == "pip-licenses"][0]
+            self.assertIn("--python", pip_license_call)
+            self.assertIn(sys.executable, pip_license_call)
             inventory = load_json(output)
             self.assertEqual(inventory["target_python"], Path(sys.executable).name)
+            self.assertEqual(inventory["python_version"], "3.11.9")
+            self.assertIn("lab_tools_python_version", inventory)
             self.assertEqual(inventory["packages"][0]["Name"], "target-only-package")
+
+    def test_license_inventory_generator_requires_target_python(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            requirements = Path(tmp) / "requirements.txt"
+            requirements.write_text("target-only-package==1.0.0\n", encoding="utf-8")
+            output = Path(tmp) / "inventory.json"
+            result = run_cmd([
+                "llm03/tier1_static/generate_license_inventory.py",
+                "--requirements", str(requirements),
+                "--output", str(output),
+            ])
+            self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+            self.assertIn("--target-python is required", load_json(output)["error"])
 
 
 class Llm03Tier2Tests(unittest.TestCase):
@@ -545,6 +564,19 @@ class Llm03Tier3Tests(unittest.TestCase):
     def load_default_prompts(self):
         return load_json(REPO_ROOT / "llm03" / "tier3_behavioral" / "prompts.json")["prompts"]
 
+    def run_compare(self, tmp, baseline, current, prompts="llm03/tier3_behavioral/prompts.json"):
+        baseline_path = Path(tmp) / "baseline.json"
+        current_path = Path(tmp) / "current.json"
+        write_json(baseline_path, baseline)
+        write_json(current_path, current)
+        return run_cmd([
+            "llm03/tier3_behavioral/compare_responses.py",
+            "--baseline", str(baseline_path),
+            "--current", str(current_path),
+            "--prompts", str(prompts),
+            "--output", str(Path(tmp) / "results.json"),
+        ])
+
     def test_matching_fixture_responses_pass(self):
         with tempfile.TemporaryDirectory() as tmp:
             result = run_cmd([
@@ -590,6 +622,33 @@ class Llm03Tier3Tests(unittest.TestCase):
             ])
             self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
 
+    def test_empty_baseline_response_exits_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            baseline = load_json(REPO_ROOT / "llm03/fixtures/tier3/baseline_pass.json")
+            current = load_json(REPO_ROOT / "llm03/fixtures/tier3/current_pass.json")
+            baseline["results"][0]["response"] = ""
+            result = self.run_compare(tmp, baseline, current)
+            self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+            self.assertIn("non-empty string", load_json(Path(tmp) / "results.json")["error"])
+
+    def test_empty_current_response_exits_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            baseline = load_json(REPO_ROOT / "llm03/fixtures/tier3/baseline_pass.json")
+            current = load_json(REPO_ROOT / "llm03/fixtures/tier3/current_pass.json")
+            current["results"][0]["response"] = ""
+            result = self.run_compare(tmp, baseline, current)
+            self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+            self.assertIn("non-empty string", load_json(Path(tmp) / "results.json")["error"])
+
+    def test_whitespace_only_response_exits_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            baseline = load_json(REPO_ROOT / "llm03/fixtures/tier3/baseline_pass.json")
+            current = load_json(REPO_ROOT / "llm03/fixtures/tier3/current_pass.json")
+            current["results"][0]["response"] = "   \n\t"
+            result = self.run_compare(tmp, baseline, current)
+            self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+            self.assertIn("non-empty string", load_json(Path(tmp) / "results.json")["error"])
+
     def test_empty_prompt_set_exits_error(self):
         with tempfile.TemporaryDirectory() as tmp:
             prompts = self.write_prompt_file(tmp, [])
@@ -629,6 +688,77 @@ class Llm03Tier3Tests(unittest.TestCase):
                 "--output", str(Path(tmp) / "results.json"),
             ])
             self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+
+    def test_duplicate_response_ids_exit_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            baseline = load_json(REPO_ROOT / "llm03/fixtures/tier3/baseline_pass.json")
+            current = load_json(REPO_ROOT / "llm03/fixtures/tier3/current_pass.json")
+            current["results"][1]["id"] = current["results"][0]["id"]
+            result = self.run_compare(tmp, baseline, current)
+            self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+            self.assertIn("duplicate prompt ID", load_json(Path(tmp) / "results.json")["error"])
+
+    def test_empty_refusal_failure_keywords_exit_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            prompts = self.load_default_prompts()
+            prompts[0]["failure_keywords"] = []
+            prompt_path = self.write_prompt_file(tmp, prompts)
+            result = run_cmd([
+                "llm03/tier3_behavioral/compare_responses.py",
+                "--baseline", "llm03/fixtures/tier3/baseline_pass.json",
+                "--current", "llm03/fixtures/tier3/current_pass.json",
+                "--prompts", str(prompt_path),
+                "--output", str(Path(tmp) / "results.json"),
+            ])
+            self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+
+    def test_empty_keyword_match_required_keywords_exit_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            prompts = self.load_default_prompts()
+            prompts[2]["required_keywords"] = []
+            prompt_path = self.write_prompt_file(tmp, prompts)
+            result = run_cmd([
+                "llm03/tier3_behavioral/compare_responses.py",
+                "--baseline", "llm03/fixtures/tier3/baseline_pass.json",
+                "--current", "llm03/fixtures/tier3/current_pass.json",
+                "--prompts", str(prompt_path),
+                "--output", str(Path(tmp) / "results.json"),
+            ])
+            self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+
+    def test_run_probes_empty_prompt_set_exits_error_without_artifact(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            prompts = self.write_prompt_file(tmp, [])
+            output = Path(tmp) / "probe_results.json"
+            result = run_cmd([
+                "llm03/tier3_behavioral/run_probes.py",
+                "--model", "fixture-model",
+                "--prompts", str(prompts),
+                "--output", str(output),
+            ])
+            self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+            self.assertFalse(output.exists())
+
+    def test_run_probes_empty_model_response_exits_error_without_artifact(self):
+        fake_requests = types.SimpleNamespace(
+            exceptions=types.SimpleNamespace(ConnectionError=ConnectionError)
+        )
+        with mock.patch.dict(sys.modules, {"requests": fake_requests}):
+            module = load_module("llm03/tier3_behavioral/run_probes.py", "run_probes_empty_response")
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp) / "probe_results.json"
+            argv = [
+                "run_probes.py",
+                "--model", "fixture-model",
+                "--prompts", "llm03/tier3_behavioral/prompts.json",
+                "--output", str(output),
+            ]
+            with mock.patch.object(sys, "argv", argv):
+                with mock.patch.object(module, "query_model", return_value="   "):
+                    with self.assertRaises(SystemExit) as cm:
+                        module.main()
+            self.assertEqual(cm.exception.code, 3)
+            self.assertFalse(output.exists())
 
     def test_changed_response_with_required_keywords_triggers_review(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -676,6 +806,32 @@ class Llm03GateTests(unittest.TestCase):
             "exit_code": exit_code,
             "timestamp": "2026-01-15T00:00:00+00:00",
         })
+
+    def test_validate_response_artifact_rejects_empty_results(self):
+        module = self.load_gate_module()
+        with tempfile.TemporaryDirectory() as tmp:
+            artifact = Path(tmp) / "responses.json"
+            write_json(artifact, {"results": []})
+            self.assertIn("must not be empty", module.validate_response_artifact(artifact, "responses"))
+
+    def test_validate_response_artifact_rejects_duplicate_response_ids(self):
+        module = self.load_gate_module()
+        with tempfile.TemporaryDirectory() as tmp:
+            artifact = Path(tmp) / "responses.json"
+            write_json(artifact, {
+                "results": [
+                    {"id": "same", "response": "first"},
+                    {"id": "same", "response": "second"},
+                ]
+            })
+            self.assertIn("duplicate response id", module.validate_response_artifact(artifact, "responses"))
+
+    def test_validate_response_artifact_rejects_whitespace_response(self):
+        module = self.load_gate_module()
+        with tempfile.TemporaryDirectory() as tmp:
+            artifact = Path(tmp) / "responses.json"
+            write_json(artifact, {"results": [{"id": "one", "response": "   "}]})
+            self.assertIn("non-empty string", module.validate_response_artifact(artifact, "responses"))
 
     def test_premerge_runs_tier1_only(self):
         with tempfile.TemporaryDirectory() as tmp:

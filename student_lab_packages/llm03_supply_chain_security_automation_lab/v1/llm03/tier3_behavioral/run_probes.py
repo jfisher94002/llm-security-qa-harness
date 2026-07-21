@@ -66,6 +66,9 @@ def main():
         prompt_data = json.load(f)
 
     prompts = prompt_data.get("prompts", [])
+    if not prompts:
+        print("ERROR — Prompts file contains zero configured prompts.")
+        sys.exit(3)
     print(f"Running {len(prompts)} probe(s) against model: {args.model}")
     print(f"Temperature: {args.temp} | Fresh sessions: yes\n")
 
@@ -73,6 +76,10 @@ def main():
     for p in prompts:
         print(f"  Probing: {p['id']}")
         response = query_model(args.model, p["prompt"], temperature=args.temp)
+        if not isinstance(response, str) or not response.strip():
+            print(f"  ERROR — Model returned an empty response for prompt: {p['id']}")
+            print("  Treating this as a tool/model failure; no valid response artifact will be saved.")
+            sys.exit(3)
         results.append({
             "id": p["id"],
             "prompt": p["prompt"],
@@ -83,6 +90,10 @@ def main():
             "timestamp": datetime.now(timezone.utc).isoformat()
         })
         print(f"    Response length: {len(response)} chars")
+
+    if not results:
+        print("ERROR — No probe results were produced.")
+        sys.exit(3)
 
     artifact = {
         "model": args.model,

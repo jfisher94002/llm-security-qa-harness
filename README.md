@@ -25,12 +25,14 @@ A practical starter kit for repeatable LLM security QA checks focused on:
 
 ### LLM03 — Three-Tier Supply Chain Harness
 
-- Tier 1: pip-audit dependency scan and pip-licenses compliance check
+- Tier 1: pip-audit dependency scan and target license-inventory compliance check
 - Tier 2: SHA-256 hash verification against a release manifest
 - Tier 3: Fixed-prompt behavioral regression with baseline comparison
 - Tiered runner that stops at the first failed tier
+- Offline policies and fixtures for reproducible lab runs
 - Release manifest template for approved model artifact hashes
 - Gate modes for pre-merge, pre-deployment, and full release
+- Maintained `cryptography` Ed25519 verification for optional detached signatures
 
 ---
 
@@ -84,6 +86,8 @@ python3 runner/run_tests.py --config config/openai.example.yaml
 
 The default mock adapter is intentionally conservative and does not need network access, API keys, Ollama, or third-party packages.
 
+The LLM01/LLM02 behavioral runner intentionally skips `test_cases/llm03_supply_chain/`; use `llm03/run_llm03.py` for the Supply Chain Security Automation Lab.
+
 ---
 
 ## Quick Run — LLM03 Supply Chain
@@ -92,22 +96,30 @@ The LLM-03 harness runs three tiers in order and stops when an earlier tier fail
 
 | Tier | Layer | Checks | Stops on |
 |------|-------|--------|----------|
-| 1 | Static code | pip-audit, pip-licenses | Critical CVE or restricted license |
-| 2 | Asset identity | SHA-256 vs release manifest | Missing or mismatched hash |
-| 3 | Behavioral | Fixed prompts, temp 0, fresh sessions | Drift outside defined tolerance |
+| 1 | Static code | dependency severity policy, target license inventory | Critical CVE hard block; unknown CVE or unapproved restricted license review |
+| 2 | Asset identity | SHA-256 and optional Ed25519 signature | Missing/mismatched hash or signature failure |
+| 3 | Behavioral | Fixed prompts, temp 0, fresh sessions, rule checks plus per-prompt baseline similarity thresholds | Drift requiring human review |
 
 ```bash
 # Pre-merge: dependency and license scan only
-python3 llm03/run_llm03.py --gate pre-merge --requirements requirements.txt
+python3 llm03/run_llm03.py --gate pre-merge \
+    --pip-audit-json llm03/fixtures/tier1/pip_audit_pass.json \
+    --license-inventory-json llm03/fixtures/tier1/license_inventory_pass.json
 
-# Pre-deployment: Tier 1 + Tier 2
+# Pre-deployment: Tier 1 + Tier 2 + Tier 3
 python3 llm03/run_llm03.py --gate pre-deploy \
-    --requirements requirements.txt \
-    --model-file ./your_model.safetensors
+    --pip-audit-json llm03/fixtures/tier1/pip_audit_pass.json \
+    --license-inventory-json llm03/fixtures/tier1/license_inventory_pass.json \
+    --model-file llm03/fixtures/tier2/approved_artifact.txt \
+    --manifest llm03/fixtures/tier2/release_manifest.fixture.json \
+    --model fixture-model \
+    --baseline llm03/fixtures/tier3/baseline_pass.json \
+    --current-responses-json llm03/fixtures/tier3/current_pass.json
 
 # Release gate: full suite
 python3 llm03/run_llm03.py --gate release \
-    --requirements requirements.txt \
+    --pip-audit-json llm03/fixtures/tier1/pip_audit_pass.json \
+    --license-inventory-json ./target_license_inventory.json \
     --model-file ./your_model.safetensors \
     --model llama3.2:3b \
     --baseline llm03/tier3_behavioral/baseline.json
@@ -117,6 +129,23 @@ python3 llm03/run_llm03.py --record-baseline --model llama3.2:3b
 ```
 
 See `demos/llm03_supply_chain_demo.md` for a full step-by-step walkthrough.
+
+Install dependencies before live LLM03 scans, probes, or Tier 2 signature checks:
+
+```bash
+python3 -m pip install -r requirements.txt
+```
+
+For live Tier 1 license evidence, install this repository's `requirements.txt` only in the lab-tools environment. Install the application dependencies in a separate target environment from `TARGET_REQUIREMENTS=/path/to/application/requirements.txt`, then pass the same file to `generate_license_inventory.py --requirements` and `run_llm03.py --requirements`.
+
+Exit codes are:
+
+- `0` passed, including recorded non-critical CVE warnings
+- `1` human review required
+- `2` deterministic hard block
+- `3` invalid configuration or tool failure
+
+For interpretation guidance and sample evidence, see `docs/llm03_results_interpretation.md` and `sample_outputs/llm03_supply_chain/`.
 
 ---
 
@@ -136,8 +165,11 @@ test_cases/
 llm03/
   run_llm03.py                   Tiered harness runner
   release_manifest.json          Approved model artifact hashes
+  policies/                      Offline severity policy and license exceptions
+  fixtures/                      Fake data for reproducible LLM03 lab runs
   tier1_static/                  Dependency and license checks
   tier2_identity/                Hash verification
   tier3_behavioral/              Behavioral regression (prompts, runner, comparator)
   sample_outputs/                LLM03 artifact output directory
+student_lab_packages/            Versioned lab package builds
 ```

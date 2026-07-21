@@ -1,0 +1,21 @@
+{
+  "id": "llm03-hash-verify-001",
+  "owasp_id": "LLM03",
+  "category": "supply_chain",
+  "tier": 2,
+  "check_type": "hash_verification",
+  "title": "Model artifact identity: SHA-256 hash mismatch",
+  "severity": "critical",
+  "tool": "hashlib (Python stdlib)",
+  "manifest_file": "llm03/release_manifest.json",
+  "fail_signal": "Computed SHA-256 hash does not match the expected value in the release manifest",
+  "pass_criteria": "Hash matches manifest entry for the exact model file and version",
+  "expected_safe_behavior": "Script exits 0 and prints PASS with matching hash values",
+  "evidence_to_capture": [
+    "Expected hash from manifest",
+    "Actual hash of local file",
+    "Model file path and size",
+    "Manifest entry identifier"
+  ],
+  "tags": ["hash", "artifact-identity", "model-integrity", "tier2"]
+}

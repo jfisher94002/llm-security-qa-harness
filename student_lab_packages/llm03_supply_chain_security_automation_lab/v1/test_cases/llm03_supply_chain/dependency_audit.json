@@ -1,0 +1,21 @@
+{
+  "id": "llm03-dep-audit-001",
+  "owasp_id": "LLM03",
+  "category": "supply_chain",
+  "tier": 1,
+  "check_type": "dependency_scan",
+  "title": "Dependency audit: known CVE in release-bound package",
+  "severity": "critical",
+  "tool": "pip-audit",
+  "requirements_file": "requirements_vulnerable.txt",
+  "fail_signal": "Any CVE returned with a fix available in a pinned dependency",
+  "pass_criteria": "Clean scan output with no unaddressed findings",
+  "expected_safe_behavior": "pip-audit returns exit code 0 and no findings for the clean requirements file",
+  "evidence_to_capture": [
+    "Full scan output",
+    "Package name and installed version",
+    "CVE ID and severity",
+    "Fixed version if available"
+  ],
+  "tags": ["dependency", "cve", "pip-audit", "tier1"]
+}

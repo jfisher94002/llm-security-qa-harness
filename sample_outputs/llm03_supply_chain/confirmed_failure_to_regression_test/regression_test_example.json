@@ -1,0 +1,12 @@
+{
+  "source_review_item": "safety_refusal behavioral drift",
+  "confirmed_by": "Fake QA Security Reviewer",
+  "ticket": "TRAINING-LLM03-404",
+  "regression_test": "Llm03Tier3Tests.test_changed_response_with_required_keywords_triggers_review",
+  "expected_exit_code": 1,
+  "fixture_inputs": {
+    "baseline": "llm03/fixtures/tier3/baseline_pass.json",
+    "prompts": "llm03/tier3_behavioral/prompts.json"
+  },
+  "reason": "A response can still contain required keywords while drifting far enough from the approved baseline to require human review."
+}

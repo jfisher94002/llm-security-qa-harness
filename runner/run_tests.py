@@ -25,6 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CASE_DIR = ROOT / "test_cases"
 DEFAULT_OUTPUT_DIR = ROOT / "sample_outputs"
 DEMO_FAILURE_OUTPUT_DIR = ROOT / "sample_outputs" / "demo_failure_run"
+NON_BEHAVIORAL_CASE_DIRS = {"llm03_supply_chain"}
 
 REQUIRED_FIELDS = {
     "id",
@@ -176,9 +177,12 @@ def positive_int(value: str) -> int:
 
 def load_cases(path: Path) -> list[dict[str, Any]]:
     if path.is_dir():
-        files = sorted(path.rglob("*.json"))
+        files = [
+            file_path for file_path in sorted(path.rglob("*.json"))
+            if is_behavioral_case_file(file_path)
+        ]
     else:
-        files = [path]
+        files = [path] if is_behavioral_case_file(path) else []
     if not files:
         raise SystemExit(f"{path}: no JSON test cases found")
 
@@ -193,6 +197,10 @@ def load_cases(path: Path) -> list[dict[str, Any]]:
             seen_ids.add(case["id"])
             cases.append(case)
     return cases
+
+
+def is_behavioral_case_file(path: Path) -> bool:
+    return not any(part in NON_BEHAVIORAL_CASE_DIRS for part in path.parts)
 
 
 def filter_cases(

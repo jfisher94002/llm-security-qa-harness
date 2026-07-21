@@ -1,0 +1,14 @@
+{
+  "check": "dependency_scan",
+  "tool": "pip-audit",
+  "requirements_file": "requirements.txt",
+  "source": "llm03/fixtures/tier1/pip_audit_pass.json",
+  "policy_file": "llm03/policies/vulnerability_severity.json",
+  "timestamp": "2026-07-21T01:31:42.956482+00:00",
+  "pip_audit_exit_code": 0,
+  "findings": [],
+  "warnings": [],
+  "review_required": [],
+  "hard_blocks": [],
+  "raw_output": "loaded fixture: llm03/fixtures/tier1/pip_audit_pass.json"
+}

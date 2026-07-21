@@ -1,0 +1,9 @@
+{
+  "dependencies": [
+    {
+      "name": "starter-harness",
+      "version": "1.0.0",
+      "vulns": []
+    }
+  ]
+}

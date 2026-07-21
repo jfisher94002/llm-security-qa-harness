@@ -55,22 +55,35 @@ python3 runner/run_tests.py --owasp LLM02 --severity high --runs 3 --output ./tm
 
 Focus on whether responses reveal fake canaries, fake credentials, PII-like placeholders, tool schemas, internal endpoint details, or hidden runtime context.
 
-## Bonus Automation Path
+## Supply Chain Security Automation Lab
 
 Start with:
 
-- `runner/run_tests.py` for loading, filtering, repeated runs, and report writing
-- `runner/evaluators.py` for simple `contains_any`, `contains_all`, and `regex` checks
-- `.github/workflows/validate.yml` for the CI validation flow
+- `llm03/` for the three-tier supply chain harness
+- `llm03/policies/` for severity mapping and license exceptions
+- `llm03/fixtures/` for offline passing and controlled-failing exercises
+- `docs/llm03_results_interpretation.md` for reading gate artifacts
 
 Useful commands:
 
 ```bash
-python3 runner/run_tests.py --runs 2 --output ./tmp_results/course-map-bonus
-python3 runner/run_tests.py --owasp LLM02 --runs 2 --output ./tmp_results/course-map-bonus
+python3 llm03/run_llm03.py --gate pre-merge \
+    --pip-audit-json llm03/fixtures/tier1/pip_audit_pass.json \
+    --license-inventory-json llm03/fixtures/tier1/license_inventory_pass.json \
+    --output ./tmp_results/course-map-llm03-premerge
+
+python3 llm03/run_llm03.py --gate pre-deploy \
+    --pip-audit-json llm03/fixtures/tier1/pip_audit_pass.json \
+    --license-inventory-json llm03/fixtures/tier1/license_inventory_pass.json \
+    --model-file llm03/fixtures/tier2/approved_artifact.txt \
+    --manifest llm03/fixtures/tier2/release_manifest.fixture.json \
+    --model fixture-model \
+    --baseline llm03/fixtures/tier3/baseline_pass.json \
+    --current-responses-json llm03/fixtures/tier3/current_pass.json \
+    --output ./tmp_results/course-map-llm03-predeploy
 ```
 
-Keep automation simple. Add focused checks before adding new abstractions.
+Keep automation simple. Add focused evidence before adding new abstractions.
 
 ## LLM03 Supply Chain Path
 
@@ -85,19 +98,27 @@ Useful commands:
 
 ```bash
 # Tier 1 only — dependency and license scan
-python3 llm03/tier1_static/run_tier1.py --requirements requirements.txt
+python3 llm03/tier1_static/run_tier1.py \
+    --pip-audit-json llm03/fixtures/tier1/pip_audit_pass.json \
+    --license-inventory-json llm03/fixtures/tier1/license_inventory_pass.json
 
 # Tier 2 only — hash verification
-python3 llm03/tier2_identity/run_tier2.py --model-file ./model.safetensors
+python3 llm03/tier2_identity/run_tier2.py \
+    --model-file llm03/fixtures/tier2/approved_artifact.txt \
+    --manifest llm03/fixtures/tier2/release_manifest.fixture.json
 
 # Record a behavioral baseline for Tier 3
 python3 llm03/run_llm03.py --record-baseline --model llama3.2:3b
 
 # Full tiered run
 python3 llm03/run_llm03.py --gate release \
-    --requirements requirements.txt \
-    --model-file ./model.safetensors \
-    --model llama3.2:3b
+    --pip-audit-json llm03/fixtures/tier1/pip_audit_pass.json \
+    --license-inventory-json llm03/fixtures/tier1/license_inventory_pass.json \
+    --model-file llm03/fixtures/tier2/approved_artifact.txt \
+    --manifest llm03/fixtures/tier2/release_manifest.fixture.json \
+    --model fixture-model \
+    --baseline llm03/fixtures/tier3/baseline_pass.json \
+    --current-responses-json llm03/fixtures/tier3/current_pass.json
 ```
 
-Focus on whether the dependency set is clean, the model artifact matches the approved hash, and the application behavior still matches the release-approved baseline.
+Focus on whether the dependency set is clean, the model artifact matches the approved hash, and the application behavior still passes the configured rules plus the release-approved baseline similarity thresholds.

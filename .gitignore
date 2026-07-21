@@ -8,6 +8,9 @@ sample_outputs/*
 !sample_outputs/mock_safe_run/**
 !sample_outputs/mock_failure_demo/
 !sample_outputs/mock_failure_demo/**
+!sample_outputs/llm03_supply_chain/
+!sample_outputs/llm03_supply_chain/**
 
 __pycache__/
 *.py[cod]
+tmp_results/

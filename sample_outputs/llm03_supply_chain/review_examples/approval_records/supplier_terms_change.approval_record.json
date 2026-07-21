@@ -1,0 +1,11 @@
+{
+  "approval_type": "supplier_terms_change",
+  "status": "approved_for_training_demo",
+  "timestamp": "2026-01-16T00:00:00+00:00",
+  "supplier": "Example Model Registry",
+  "change_summary": "Fake supplier terms changed from demo-2026-a to demo-2026-b.",
+  "approver": "Fake Procurement Reviewer",
+  "reason": "No production use; classroom-only fixture remains acceptable.",
+  "ticket": "TRAINING-LLM03-202",
+  "expiration": "2026-12-31"
+}

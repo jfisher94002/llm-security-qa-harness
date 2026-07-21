@@ -1,0 +1,8 @@
+{
+  "gate": "release",
+  "result": "review_required",
+  "timestamp": "2026-07-21T01:31:43.097765+00:00",
+  "stopped_at": "tier3_behavioral",
+  "review_items": [],
+  "instructions": "Human approval is required before this gate can proceed."
+}

@@ -12,7 +12,7 @@ python3 --version
 
 ## 2. Install Requirements
 
-The default harness uses only the Python standard library. This command is still safe and keeps the workflow familiar:
+The default LLM01/LLM02 harness uses only the Python standard library. Live LLM03 work uses `cryptography`, `requests`, `pip-audit`, and `pip-licenses`; offline fixtures still run without Ollama or network model calls.
 
 ```bash
 python3 -m pip install -r requirements.txt
@@ -75,7 +75,7 @@ OpenAI example:
 
 ```bash
 cp config/openai.example.yaml config/openai.local.yaml
-export OPENAI_API_KEY="replace-with-your-key"
+export OPENAI_API_KEY="YOUR_OPENAI_API_KEY"
 python3 runner/run_tests.py --config config/openai.local.yaml
 ```
 
@@ -87,4 +87,77 @@ A pass means the response did not contain the configured failure indicators. It 
 
 ## 8. CI Checks
 
-Pull requests and pushes to `main` run GitHub Actions validation for JSON syntax, Python syntax, the default mock run, a repeated mock run with `--runs 2`, and a filtered mock run.
+Pull requests and pushes to `main` run GitHub Actions validation for JSON syntax, Python syntax, the default mock run, a repeated mock run with `--runs 2`, a filtered mock run, and the offline LLM03 unittest suite.
+
+## 9. Try The LLM03 Supply Chain Lab
+
+Run the offline pre-merge gate:
+
+```bash
+python3 llm03/run_llm03.py --gate pre-merge \
+    --pip-audit-json llm03/fixtures/tier1/pip_audit_pass.json \
+    --license-inventory-json llm03/fixtures/tier1/license_inventory_pass.json \
+    --output ./tmp_results/llm03-pre-merge
+```
+
+Run the offline pre-deployment gate across all three tiers:
+
+```bash
+python3 llm03/run_llm03.py --gate pre-deploy \
+    --pip-audit-json llm03/fixtures/tier1/pip_audit_pass.json \
+    --license-inventory-json llm03/fixtures/tier1/license_inventory_pass.json \
+    --model-file llm03/fixtures/tier2/approved_artifact.txt \
+    --manifest llm03/fixtures/tier2/release_manifest.fixture.json \
+    --model fixture-model \
+    --baseline llm03/fixtures/tier3/baseline_pass.json \
+    --current-responses-json llm03/fixtures/tier3/current_pass.json \
+    --output ./tmp_results/llm03-pre-deploy
+```
+
+Use `docs/llm03_results_interpretation.md` to read `gate_result.json`, `review_gate.json`, and the tier evidence.
+
+Live Tier 1 license inventory uses two environments. The lab-tools environment installs this repository's `requirements.txt`; the target environment installs the application's own requirements file:
+
+macOS/Linux:
+
+```bash
+TARGET_REQUIREMENTS=/path/to/application/requirements.txt
+
+python3 -m venv .venv-llm03-tools
+source .venv-llm03-tools/bin/activate
+python3 -m pip install -r requirements.txt
+
+python3 -m venv .venv-llm03-target
+.venv-llm03-target/bin/python -m pip install -r "$TARGET_REQUIREMENTS"
+
+python3 llm03/tier1_static/generate_license_inventory.py \
+    --requirements "$TARGET_REQUIREMENTS" \
+    --target-python .venv-llm03-target/bin/python \
+    --output target_license_inventory.json
+
+python3 llm03/run_llm03.py --gate pre-merge \
+    --requirements "$TARGET_REQUIREMENTS" \
+    --license-inventory-json target_license_inventory.json
+```
+
+Windows PowerShell:
+
+```powershell
+$TARGET_REQUIREMENTS = "C:\path\to\application\requirements.txt"
+
+py -3.10 -m venv .venv-llm03-tools
+.\.venv-llm03-tools\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+
+py -3.10 -m venv .venv-llm03-target
+.\.venv-llm03-target\Scripts\python.exe -m pip install -r $TARGET_REQUIREMENTS
+
+python llm03\tier1_static\generate_license_inventory.py `
+    --requirements $TARGET_REQUIREMENTS `
+    --target-python .\.venv-llm03-target\Scripts\python.exe `
+    --output target_license_inventory.json
+
+python llm03\run_llm03.py --gate pre-merge `
+    --requirements $TARGET_REQUIREMENTS `
+    --license-inventory-json target_license_inventory.json
+```

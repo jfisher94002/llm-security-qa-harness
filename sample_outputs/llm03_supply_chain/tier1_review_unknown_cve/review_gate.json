@@ -1,0 +1,23 @@
+{
+  "gate": "tier1_static",
+  "result": "review_required",
+  "timestamp": "2026-07-21T01:31:12.539346+00:00",
+  "review_items": [
+    {
+      "package": "unmapped-helper",
+      "installed_version": "0.9.0",
+      "vuln_id": "CVE-2099-9999",
+      "aliases": [
+        "CVE-2099-9999"
+      ],
+      "mapped_severity": "unknown",
+      "mapped_by": null,
+      "disposition": "review_required",
+      "fix_versions": [
+        "0.9.1"
+      ],
+      "description": "Fake unmapped dependency finding that requires human review."
+    }
+  ],
+  "instructions": "Human review is required before proceeding to Tier 2."
+}

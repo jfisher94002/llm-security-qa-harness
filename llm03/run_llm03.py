@@ -53,6 +53,64 @@ def read_json_if_exists(path):
         return None
 
 
+def read_json_required(path, label):
+    if not path or not os.path.exists(path):
+        return None, f"{label} artifact missing: {path}"
+    try:
+        with open(path, encoding="utf-8") as handle:
+            data = json.load(handle)
+    except json.JSONDecodeError as exc:
+        return None, f"{label} artifact is malformed JSON: {exc}"
+    if not isinstance(data, dict):
+        return None, f"{label} artifact must be a JSON object"
+    return data, None
+
+
+def validate_exit_artifact(process_exit_code, artifact_path, label):
+    valid_codes = {EXIT_PASS, EXIT_REVIEW, EXIT_HARD_BLOCK, EXIT_INVALID}
+    if process_exit_code not in valid_codes:
+        return EXIT_INVALID, None, f"{label} process returned unexpected exit code {process_exit_code}"
+    artifact, error = read_json_required(artifact_path, label)
+    if error:
+        return EXIT_INVALID, None, error
+    artifact_exit_code = artifact.get("exit_code")
+    if artifact_exit_code not in valid_codes:
+        return EXIT_INVALID, artifact, f"{label} artifact exit_code must be one of 0, 1, 2, or 3"
+    if artifact_exit_code != process_exit_code:
+        return (
+            EXIT_INVALID,
+            artifact,
+            f"{label} process exit code {process_exit_code} does not match artifact exit_code {artifact_exit_code}",
+        )
+    return artifact_exit_code, artifact, None
+
+
+def validate_response_artifact(path, label):
+    artifact, error = read_json_required(path, label)
+    if error:
+        return error
+    results = artifact.get("results")
+    if not isinstance(results, list):
+        return f"{label} artifact results must be an array"
+    for index, item in enumerate(results):
+        if not isinstance(item, dict):
+            return f"{label} artifact results[{index}] must be an object"
+        if not isinstance(item.get("id"), str) or not item["id"].strip():
+            return f"{label} artifact results[{index}].id must be a non-empty string"
+        if not isinstance(item.get("response"), str):
+            return f"{label} artifact results[{index}].response must be a string"
+    return None
+
+
+def mark_tier_artifact_error(gate_result, message):
+    gate_result.setdefault("artifact_errors", []).append(message)
+    print(f"ERROR - {message}")
+
+
+def python_command(script_path, *args):
+    return [sys.executable, script_path, *args]
+
+
 def run(cmd, label):
     print(f"\n{'-' * 60}")
     print(f"Running: {label}")
@@ -182,13 +240,21 @@ def main():
             gate_result["configuration_errors"] = ["--model is required to record a baseline"]
             finalize(output_dir, gate_result, EXIT_INVALID, "configuration")
         code = run(
-            ["python3", "llm03/tier3_behavioral/run_probes.py",
-             "--model", args.model,
-             "--prompts", args.prompts,
-             "--output", args.baseline],
+            python_command(
+                "llm03/tier3_behavioral/run_probes.py",
+                "--model", args.model,
+                "--prompts", args.prompts,
+                "--output", args.baseline,
+            ),
             "Recording behavioral baseline",
         )
-        finalize(output_dir, gate_result, code if code in (0, 3) else EXIT_INVALID, "record_baseline")
+        if code != EXIT_PASS:
+            finalize(output_dir, gate_result, EXIT_INVALID, "record_baseline")
+        response_error = validate_response_artifact(args.baseline, "recorded baseline")
+        if response_error:
+            mark_tier_artifact_error(gate_result, response_error)
+            finalize(output_dir, gate_result, EXIT_INVALID, "record_baseline")
+        finalize(output_dir, gate_result, EXIT_PASS, "record_baseline")
 
     if not args.license_inventory_json:
         gate_result["configuration_errors"] = [
@@ -198,7 +264,7 @@ def main():
 
     tier1_output = os.path.join(output_dir, f"tier1_{ts}")
     tier1_cmd = [
-        "python3", "llm03/tier1_static/run_tier1.py",
+        sys.executable, "llm03/tier1_static/run_tier1.py",
         "--requirements", args.requirements,
         "--output", tier1_output,
         "--vulnerability-policy", args.vulnerability_policy,
@@ -213,9 +279,13 @@ def main():
         "license_scan": os.path.join(tier1_output, "license_scan.json"),
         "tier_result": os.path.join(tier1_output, "tier1_result.json"),
     }
+    tier1_code, tier_artifact, artifact_error = validate_exit_artifact(
+        tier1_code, tier1_artifacts["tier_result"], "Tier 1"
+    )
+    if artifact_error:
+        mark_tier_artifact_error(gate_result, artifact_error)
     gate_result["tiers"].append(tier_record(1, "tier1_static", tier1_code, tier1_output, tier1_artifacts))
     if tier1_code != EXIT_PASS:
-        tier_artifact = read_json_if_exists(tier1_artifacts["tier_result"])
         finalize(output_dir, gate_result, tier1_code, "tier1_static", tier_artifact)
 
     if args.gate == "pre-merge":
@@ -228,7 +298,7 @@ def main():
 
     tier2_output = os.path.join(output_dir, f"tier2_{ts}")
     tier2_cmd = [
-        "python3", "llm03/tier2_identity/run_tier2.py",
+        sys.executable, "llm03/tier2_identity/run_tier2.py",
         "--model-file", args.model_file,
         "--manifest", args.manifest,
         "--output", tier2_output,
@@ -243,9 +313,13 @@ def main():
     tier2_artifacts = {
         "asset_identity": os.path.join(tier2_output, "hash_check.json"),
     }
+    tier2_code, tier_artifact, artifact_error = validate_exit_artifact(
+        tier2_code, tier2_artifacts["asset_identity"], "Tier 2"
+    )
+    if artifact_error:
+        mark_tier_artifact_error(gate_result, artifact_error)
     gate_result["tiers"].append(tier_record(2, "tier2_identity", tier2_code, tier2_output, tier2_artifacts))
     if tier2_code != EXIT_PASS:
-        tier_artifact = read_json_if_exists(tier2_artifacts["asset_identity"])
         finalize(output_dir, gate_result, tier2_code, "tier2_identity", tier_artifact)
 
     if args.current_responses_json:
@@ -254,10 +328,12 @@ def main():
     else:
         current_path = os.path.join(output_dir, f"current_{ts}.json")
         probe_code = run(
-            ["python3", "llm03/tier3_behavioral/run_probes.py",
-             "--model", args.model,
-             "--prompts", args.prompts,
-             "--output", current_path],
+            python_command(
+                "llm03/tier3_behavioral/run_probes.py",
+                "--model", args.model,
+                "--prompts", args.prompts,
+                "--output", current_path,
+            ),
             "Tier 3: Running behavioral probes",
         )
 
@@ -271,18 +347,31 @@ def main():
             3, "tier3_behavioral_probe", EXIT_INVALID, tier3_output, tier3_artifacts
         ))
         finalize(output_dir, gate_result, EXIT_INVALID, "tier3_behavioral_probe")
+    response_error = validate_response_artifact(current_path, "Tier 3 current responses")
+    if response_error:
+        mark_tier_artifact_error(gate_result, response_error)
+        gate_result["tiers"].append(tier_record(
+            3, "tier3_behavioral_probe", EXIT_INVALID, tier3_output, tier3_artifacts
+        ))
+        finalize(output_dir, gate_result, EXIT_INVALID, "tier3_behavioral_probe")
 
     compare_code = run(
-        ["python3", "llm03/tier3_behavioral/compare_responses.py",
-         "--baseline", args.baseline,
-         "--current", current_path,
-         "--prompts", args.prompts,
-         "--output", tier3_artifacts["comparison"]],
+        python_command(
+            "llm03/tier3_behavioral/compare_responses.py",
+            "--baseline", args.baseline,
+            "--current", current_path,
+            "--prompts", args.prompts,
+            "--output", tier3_artifacts["comparison"],
+        ),
         "Tier 3: Comparing against baseline",
     )
+    compare_code, tier_artifact, artifact_error = validate_exit_artifact(
+        compare_code, tier3_artifacts["comparison"], "Tier 3 comparison"
+    )
+    if artifact_error:
+        mark_tier_artifact_error(gate_result, artifact_error)
     gate_result["tiers"].append(tier_record(3, "tier3_behavioral", compare_code, tier3_output, tier3_artifacts))
     if compare_code != EXIT_PASS:
-        tier_artifact = read_json_if_exists(tier3_artifacts["comparison"])
         finalize(output_dir, gate_result, compare_code, "tier3_behavioral", tier_artifact)
 
     finalize(output_dir, gate_result, EXIT_PASS)

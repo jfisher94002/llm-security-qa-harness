@@ -1,6 +1,6 @@
 {
   "gate": "pre-deploy",
-  "started_at": "2026-07-20T18:43:30.075960+00:00",
+  "started_at": "2026-07-21T01:31:42.914030+00:00",
   "tier_order": [
     "tier1_static",
     "tier2_identity",
@@ -12,11 +12,11 @@
       "name": "tier1_static",
       "result": "hard_block",
       "exit_code": 2,
-      "artifact_dir": "sample_outputs/llm03_supply_chain/gate_tier1_hard_block/tier1_20260720T184330",
+      "artifact_dir": "sample_outputs/llm03_supply_chain/gate_tier1_hard_block/tier1_20260721T013142",
       "artifacts": {
-        "dependency_scan": "sample_outputs/llm03_supply_chain/gate_tier1_hard_block/tier1_20260720T184330/dep_scan.json",
-        "license_scan": "sample_outputs/llm03_supply_chain/gate_tier1_hard_block/tier1_20260720T184330/license_scan.json",
-        "tier_result": "sample_outputs/llm03_supply_chain/gate_tier1_hard_block/tier1_20260720T184330/tier1_result.json"
+        "dependency_scan": "sample_outputs/llm03_supply_chain/gate_tier1_hard_block/tier1_20260721T013142/dep_scan.json",
+        "license_scan": "sample_outputs/llm03_supply_chain/gate_tier1_hard_block/tier1_20260721T013142/license_scan.json",
+        "tier_result": "sample_outputs/llm03_supply_chain/gate_tier1_hard_block/tier1_20260721T013142/tier1_result.json"
       }
     }
   ],
@@ -26,5 +26,5 @@
   "exit_code": 2,
   "result": "hard_block",
   "stopped_at": "tier1_static",
-  "completed_at": "2026-07-20T18:43:30.130671+00:00"
+  "completed_at": "2026-07-21T01:31:42.967574+00:00"
 }

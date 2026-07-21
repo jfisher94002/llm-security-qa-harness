@@ -35,18 +35,21 @@ def sha256_file(path):
     return digest.hexdigest()
 
 
-def run_pip_licenses():
+def run_pip_licenses(target_python):
+    cmd = ["pip-licenses", "--format", "json", "--with-license-file", "--no-license-path"]
+    if target_python:
+        cmd.extend(["--python", target_python])
     try:
         result = subprocess.run(
-            ["pip-licenses", "--format", "json", "--with-license-file", "--no-license-path"],
+            cmd,
             capture_output=True,
             text=True,
             timeout=TIMEOUT_SECONDS,
         )
     except FileNotFoundError:
         raise ValueError(
-            "pip-licenses executable not found. Install it in the active target "
-            "environment with: python3 -m pip install pip-licenses"
+            "pip-licenses executable not found. Install it in the lab-tools "
+            "environment with: python3 -m pip install -r requirements.txt"
         )
     except subprocess.TimeoutExpired as exc:
         raise ValueError(f"pip-licenses timed out after {exc.timeout} seconds")
@@ -80,23 +83,35 @@ def normalize_packages(packages):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--requirements", default="requirements.txt",
-                        help="Target requirements file installed in the active environment")
+                        help="Target requirements file installed in the target environment")
     parser.add_argument("--output", default="target_license_inventory.json",
                         help="Output inventory JSON path")
+    parser.add_argument("--target-python",
+                        help="Python executable for the isolated target environment to inspect")
     args = parser.parse_args()
 
     try:
         requirements_path = Path(args.requirements)
         if not requirements_path.exists():
             raise ValueError(f"requirements file not found: {args.requirements}")
-        packages = normalize_packages(run_pip_licenses())
+        if args.target_python:
+            target_python = Path(args.target_python)
+            if not target_python.exists():
+                raise ValueError(f"target Python executable not found: {args.target_python}")
+            if not target_python.is_file():
+                raise ValueError(f"target Python path is not a file: {args.target_python}")
+            target_python_label = target_python.name
+        else:
+            target_python_label = "active-python"
+        packages = normalize_packages(run_pip_licenses(args.target_python))
         inventory = {
-            "source": "active target Python environment",
+            "source": "target Python environment",
             "generated_at": now_utc(),
             "requirements_file": requirements_path.name,
             "requirements_sha256": sha256_file(requirements_path),
             "generator": "llm03/tier1_static/generate_license_inventory.py",
             "python_version": sys.version.split()[0],
+            "target_python": target_python_label,
             "packages": packages,
         }
         write_json(args.output, inventory)
@@ -109,6 +124,7 @@ def main():
             "timestamp": now_utc(),
             "requirements_file": Path(args.requirements).name,
             "generator": "llm03/tier1_static/generate_license_inventory.py",
+            "target_python": Path(args.target_python).name if args.target_python else "active-python",
             "error": str(exc),
         }
         write_json(args.output, error_artifact)

@@ -12,7 +12,7 @@ python3 --version
 
 ## 2. Install Requirements
 
-The default LLM01/LLM02 harness uses only the Python standard library. LLM03 signature verification uses the maintained `cryptography` package.
+The default LLM01/LLM02 harness uses only the Python standard library. Live LLM03 work uses `cryptography`, `requests`, `pip-audit`, and `pip-licenses`; offline fixtures still run without Ollama or network model calls.
 
 ```bash
 python3 -m pip install -r requirements.txt

@@ -239,6 +239,141 @@ class Llm03Tier1Tests(unittest.TestCase):
             ])
             self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
 
+    def test_malformed_vulnerability_policy_root_returns_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            policy = Path(tmp) / "bad_policy.json"
+            write_json(policy, [])
+            result = run_cmd([
+                "llm03/tier1_static/run_tier1.py",
+                "--pip-audit-json", "llm03/fixtures/tier1/pip_audit_pass.json",
+                "--vulnerability-policy", str(policy),
+                "--license-inventory-json", "llm03/fixtures/tier1/license_inventory_pass.json",
+                "--output", tmp,
+            ])
+            self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+
+    def test_malformed_vulnerability_policy_entry_returns_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            policy = Path(tmp) / "bad_policy.json"
+            write_json(policy, {
+                "hard_block_severities": ["critical"],
+                "vulnerabilities": {"CVE-2099-0001": {"severity": 12}},
+            })
+            result = run_cmd([
+                "llm03/tier1_static/run_tier1.py",
+                "--pip-audit-json", "llm03/fixtures/tier1/pip_audit_pass.json",
+                "--vulnerability-policy", str(policy),
+                "--license-inventory-json", "llm03/fixtures/tier1/license_inventory_pass.json",
+                "--output", tmp,
+            ])
+            self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+
+    def test_malformed_vulnerability_policy_severity_list_returns_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            policy = Path(tmp) / "bad_policy.json"
+            write_json(policy, {
+                "hard_block_severities": ["catastrophic"],
+                "vulnerabilities": {},
+            })
+            result = run_cmd([
+                "llm03/tier1_static/run_tier1.py",
+                "--pip-audit-json", "llm03/fixtures/tier1/pip_audit_pass.json",
+                "--vulnerability-policy", str(policy),
+                "--license-inventory-json", "llm03/fixtures/tier1/license_inventory_pass.json",
+                "--output", tmp,
+            ])
+            self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+
+    def test_malformed_pip_audit_dependency_returns_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            audit = Path(tmp) / "bad_audit.json"
+            write_json(audit, {"dependencies": ["bad"]})
+            result = run_cmd([
+                "llm03/tier1_static/run_tier1.py",
+                "--pip-audit-json", str(audit),
+                "--license-inventory-json", "llm03/fixtures/tier1/license_inventory_pass.json",
+                "--output", tmp,
+            ])
+            self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+
+    def test_malformed_pip_audit_vulnerability_returns_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            audit = Path(tmp) / "bad_audit.json"
+            write_json(audit, {
+                "dependencies": [{
+                    "name": "demo",
+                    "version": "1.0",
+                    "vulns": [{"id": 123}],
+                }]
+            })
+            result = run_cmd([
+                "llm03/tier1_static/run_tier1.py",
+                "--pip-audit-json", str(audit),
+                "--license-inventory-json", "llm03/fixtures/tier1/license_inventory_pass.json",
+                "--output", tmp,
+            ])
+            self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+
+    def test_malformed_license_exception_root_returns_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            exceptions = Path(tmp) / "bad_exceptions.json"
+            write_json(exceptions, {"not_exceptions": []})
+            result = run_cmd([
+                "llm03/tier1_static/run_tier1.py",
+                "--pip-audit-json", "llm03/fixtures/tier1/pip_audit_pass.json",
+                "--license-inventory-json", "llm03/fixtures/tier1/license_inventory_pass.json",
+                "--license-exceptions", str(exceptions),
+                "--output", tmp,
+            ])
+            self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+
+    def test_malformed_license_exception_entry_returns_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            exceptions = Path(tmp) / "bad_exceptions.json"
+            write_json(exceptions, {"exceptions": ["bad"]})
+            result = run_cmd([
+                "llm03/tier1_static/run_tier1.py",
+                "--pip-audit-json", "llm03/fixtures/tier1/pip_audit_pass.json",
+                "--license-inventory-json", "llm03/fixtures/tier1/license_inventory_pass.json",
+                "--license-exceptions", str(exceptions),
+                "--output", tmp,
+            ])
+            self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+
+    def test_license_inventory_generator_uses_target_python(self):
+        module = load_module(
+            "llm03/tier1_static/generate_license_inventory.py",
+            "license_inventory_generator_under_test",
+        )
+        calls = []
+
+        def fake_run(cmd, **kwargs):
+            calls.append(cmd)
+            stdout = json.dumps([
+                {"Name": "target-only-package", "Version": "1.0.0", "License": "MIT"}
+            ])
+            return subprocess.CompletedProcess(cmd, 0, stdout=stdout, stderr="")
+
+        with tempfile.TemporaryDirectory() as tmp:
+            requirements = Path(tmp) / "requirements.txt"
+            requirements.write_text("target-only-package==1.0.0\n", encoding="utf-8")
+            output = Path(tmp) / "inventory.json"
+            argv = [
+                "generate_license_inventory.py",
+                "--requirements", str(requirements),
+                "--target-python", sys.executable,
+                "--output", str(output),
+            ]
+            with mock.patch.object(sys, "argv", argv), mock.patch.object(module.subprocess, "run", fake_run):
+                with self.assertRaises(SystemExit) as cm:
+                    module.main()
+            self.assertEqual(cm.exception.code, 0)
+            self.assertIn("--python", calls[0])
+            self.assertIn(sys.executable, calls[0])
+            inventory = load_json(output)
+            self.assertEqual(inventory["target_python"], Path(sys.executable).name)
+            self.assertEqual(inventory["packages"][0]["Name"], "target-only-package")
+
 
 class Llm03Tier2Tests(unittest.TestCase):
     def test_hash_and_signature_pass(self):
@@ -328,8 +463,220 @@ class Llm03Tier2Tests(unittest.TestCase):
             ])
             self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
 
+    def test_malformed_manifest_root_returns_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            manifest = Path(tmp) / "bad_manifest.json"
+            write_json(manifest, [])
+            result = run_cmd([
+                "llm03/tier2_identity/run_tier2.py",
+                "--model-file", "llm03/fixtures/tier2/approved_artifact.txt",
+                "--manifest", str(manifest),
+                "--output", tmp,
+            ])
+            self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+
+    def test_malformed_manifest_models_array_returns_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            manifest = Path(tmp) / "bad_manifest.json"
+            write_json(manifest, {"models": "bad"})
+            result = run_cmd([
+                "llm03/tier2_identity/run_tier2.py",
+                "--model-file", "llm03/fixtures/tier2/approved_artifact.txt",
+                "--manifest", str(manifest),
+                "--output", tmp,
+            ])
+            self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+
+    def test_malformed_manifest_entry_hash_returns_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            manifest = Path(tmp) / "bad_manifest.json"
+            write_json(manifest, {"models": [{"file_name": "approved_artifact.txt", "sha256": "bad"}]})
+            result = run_cmd([
+                "llm03/tier2_identity/run_tier2.py",
+                "--model-file", "llm03/fixtures/tier2/approved_artifact.txt",
+                "--manifest", str(manifest),
+                "--output", tmp,
+            ])
+            self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+
+    def test_malformed_manifest_signature_path_returns_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            manifest = Path(tmp) / "bad_manifest.json"
+            write_json(manifest, {
+                "models": [{
+                    "file_name": "approved_artifact.txt",
+                    "sha256": "0" * 64,
+                    "signature_file": str(Path("bad.sig").resolve()),
+                }]
+            })
+            result = run_cmd([
+                "llm03/tier2_identity/run_tier2.py",
+                "--model-file", "llm03/fixtures/tier2/approved_artifact.txt",
+                "--manifest", str(manifest),
+                "--output", tmp,
+            ])
+            self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+
+    def test_malformed_manifest_public_key_returns_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            manifest = Path(tmp) / "bad_manifest.json"
+            write_json(manifest, {
+                "models": [{
+                    "file_name": "approved_artifact.txt",
+                    "sha256": "0" * 64,
+                    "ed25519_public_key": "abcd",
+                }]
+            })
+            result = run_cmd([
+                "llm03/tier2_identity/run_tier2.py",
+                "--model-file", "llm03/fixtures/tier2/approved_artifact.txt",
+                "--manifest", str(manifest),
+                "--output", tmp,
+            ])
+            self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+
+
+class Llm03Tier3Tests(unittest.TestCase):
+    def write_prompt_file(self, directory, prompts):
+        path = Path(directory) / "prompts.json"
+        write_json(path, {"prompts": prompts})
+        return path
+
+    def load_default_prompts(self):
+        return load_json(REPO_ROOT / "llm03" / "tier3_behavioral" / "prompts.json")["prompts"]
+
+    def test_matching_fixture_responses_pass(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            result = run_cmd([
+                "llm03/tier3_behavioral/compare_responses.py",
+                "--baseline", "llm03/fixtures/tier3/baseline_pass.json",
+                "--current", "llm03/fixtures/tier3/current_pass.json",
+                "--prompts", "llm03/tier3_behavioral/prompts.json",
+                "--output", str(Path(tmp) / "results.json"),
+            ])
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            artifact = load_json(Path(tmp) / "results.json")
+            self.assertEqual(artifact["checks_run"], 3)
+            self.assertIn("baseline_similarity_score", artifact["results"][0])
+
+    def test_missing_baseline_prompt_exits_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            baseline = load_json(REPO_ROOT / "llm03/fixtures/tier3/baseline_pass.json")
+            baseline["results"] = baseline["results"][1:]
+            baseline_path = Path(tmp) / "baseline.json"
+            write_json(baseline_path, baseline)
+            result = run_cmd([
+                "llm03/tier3_behavioral/compare_responses.py",
+                "--baseline", str(baseline_path),
+                "--current", "llm03/fixtures/tier3/current_pass.json",
+                "--prompts", "llm03/tier3_behavioral/prompts.json",
+                "--output", str(Path(tmp) / "results.json"),
+            ])
+            self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+            self.assertTrue((Path(tmp) / "results.json").exists())
+
+    def test_missing_current_prompt_exits_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            current = load_json(REPO_ROOT / "llm03/fixtures/tier3/current_pass.json")
+            current["results"] = current["results"][:-1]
+            current_path = Path(tmp) / "current.json"
+            write_json(current_path, current)
+            result = run_cmd([
+                "llm03/tier3_behavioral/compare_responses.py",
+                "--baseline", "llm03/fixtures/tier3/baseline_pass.json",
+                "--current", str(current_path),
+                "--prompts", "llm03/tier3_behavioral/prompts.json",
+                "--output", str(Path(tmp) / "results.json"),
+            ])
+            self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+
+    def test_empty_prompt_set_exits_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            prompts = self.write_prompt_file(tmp, [])
+            result = run_cmd([
+                "llm03/tier3_behavioral/compare_responses.py",
+                "--baseline", "llm03/fixtures/tier3/baseline_pass.json",
+                "--current", "llm03/fixtures/tier3/current_pass.json",
+                "--prompts", str(prompts),
+                "--output", str(Path(tmp) / "results.json"),
+            ])
+            self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+
+    def test_duplicate_prompt_ids_exit_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            prompts = self.load_default_prompts()
+            prompts[1]["id"] = prompts[0]["id"]
+            prompt_path = self.write_prompt_file(tmp, prompts)
+            result = run_cmd([
+                "llm03/tier3_behavioral/compare_responses.py",
+                "--baseline", "llm03/fixtures/tier3/baseline_pass.json",
+                "--current", "llm03/fixtures/tier3/current_pass.json",
+                "--prompts", str(prompt_path),
+                "--output", str(Path(tmp) / "results.json"),
+            ])
+            self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+
+    def test_unknown_check_type_exits_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            prompts = self.load_default_prompts()
+            prompts[0]["check_type"] = "semantic_vibes"
+            prompt_path = self.write_prompt_file(tmp, prompts)
+            result = run_cmd([
+                "llm03/tier3_behavioral/compare_responses.py",
+                "--baseline", "llm03/fixtures/tier3/baseline_pass.json",
+                "--current", "llm03/fixtures/tier3/current_pass.json",
+                "--prompts", str(prompt_path),
+                "--output", str(Path(tmp) / "results.json"),
+            ])
+            self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+
+    def test_changed_response_with_required_keywords_triggers_review(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            current = load_json(REPO_ROOT / "llm03/fixtures/tier3/current_pass.json")
+            current["results"][2]["response"] = (
+                "A SHA-256 check returns a hash digest, but this response now adds a long, "
+                "different explanation about release ceremonies, unrelated audit notes, "
+                "supplier questionnaires, escalation queues, and classroom examples."
+            )
+            current_path = Path(tmp) / "current.json"
+            write_json(current_path, current)
+            result = run_cmd([
+                "llm03/tier3_behavioral/compare_responses.py",
+                "--baseline", "llm03/fixtures/tier3/baseline_pass.json",
+                "--current", str(current_path),
+                "--prompts", "llm03/tier3_behavioral/prompts.json",
+                "--output", str(Path(tmp) / "results.json"),
+            ])
+            self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+            artifact = load_json(Path(tmp) / "results.json")
+            factual = [item for item in artifact["results"] if item["id"] == "factual_consistency"][0]
+            self.assertEqual(factual["rule_result"], "PASS")
+            self.assertEqual(factual["drift_result"], "FAIL")
+
 
 class Llm03GateTests(unittest.TestCase):
+    def load_gate_module(self):
+        return load_module("llm03/run_llm03.py", "run_llm03_gate_under_test")
+
+    def gate_argv(self, tmp):
+        return [
+            "run_llm03.py",
+            "--gate", "pre-merge",
+            "--pip-audit-json", "llm03/fixtures/tier1/pip_audit_pass.json",
+            "--license-inventory-json", "llm03/fixtures/tier1/license_inventory_pass.json",
+            "--output", tmp,
+        ]
+
+    def write_tier1_result(self, output_dir, exit_code):
+        tier_dir = Path(output_dir) / "tier1_TS"
+        tier_dir.mkdir(parents=True, exist_ok=True)
+        write_json(tier_dir / "tier1_result.json", {
+            "tier": 1,
+            "result": "passed" if exit_code == 0 else "review_required",
+            "exit_code": exit_code,
+            "timestamp": "2026-01-15T00:00:00+00:00",
+        })
+
     def test_premerge_runs_tier1_only(self):
         with tempfile.TemporaryDirectory() as tmp:
             result = run_cmd([
@@ -430,6 +777,24 @@ class Llm03GateTests(unittest.TestCase):
 
         def fake_run(cmd, label):
             calls.append(label)
+            if "Tier 1" in label:
+                tier1_dir = Path(tmp) / "tier1_TS"
+                tier1_dir.mkdir(parents=True, exist_ok=True)
+                write_json(tier1_dir / "tier1_result.json", {
+                    "tier": 1,
+                    "result": "passed",
+                    "exit_code": 0,
+                    "timestamp": "2026-01-15T00:00:00+00:00",
+                })
+            if "Tier 2" in label:
+                tier2_dir = Path(tmp) / "tier2_TS"
+                tier2_dir.mkdir(parents=True, exist_ok=True)
+                write_json(tier2_dir / "hash_check.json", {
+                    "check": "asset_identity",
+                    "result": "PASS",
+                    "exit_code": 0,
+                    "timestamp": "2026-01-15T00:00:00+00:00",
+                })
             if "Running behavioral probes" in label:
                 return 3
             return 0
@@ -447,10 +812,86 @@ class Llm03GateTests(unittest.TestCase):
                 "--output", tmp,
             ]
             with mock.patch.object(sys, "argv", argv), mock.patch.object(module, "run", fake_run):
-                with self.assertRaises(SystemExit) as cm:
-                    module.main()
+                with mock.patch.object(module, "timestamp", return_value="TS"):
+                    with self.assertRaises(SystemExit) as cm:
+                        module.main()
         self.assertEqual(cm.exception.code, 3)
+        self.assertIn("Tier 3: Running behavioral probes", calls)
         self.assertNotIn("Tier 3: Comparing against baseline", calls)
+
+    def test_child_exit_one_without_artifact_is_invalid_not_review(self):
+        module = self.load_gate_module()
+        with tempfile.TemporaryDirectory() as tmp:
+            with mock.patch.object(sys, "argv", self.gate_argv(tmp)):
+                with mock.patch.object(module, "timestamp", return_value="TS"):
+                    with mock.patch.object(module, "run", return_value=1):
+                        with self.assertRaises(SystemExit) as cm:
+                            module.main()
+            self.assertEqual(cm.exception.code, 3)
+            gate_result = load_json(Path(tmp) / "gate_result.json")
+            self.assertEqual(gate_result["result"], "invalid_configuration_or_tool_failure")
+            self.assertIn("artifact_errors", gate_result)
+
+    def test_malformed_tier_artifact_is_invalid(self):
+        module = self.load_gate_module()
+
+        def fake_run(cmd, label):
+            tier_dir = Path(tmp) / "tier1_TS"
+            tier_dir.mkdir(parents=True, exist_ok=True)
+            (tier_dir / "tier1_result.json").write_text("{bad", encoding="utf-8")
+            return 0
+
+        with tempfile.TemporaryDirectory() as tmp:
+            with mock.patch.object(sys, "argv", self.gate_argv(tmp)):
+                with mock.patch.object(module, "timestamp", return_value="TS"):
+                    with mock.patch.object(module, "run", fake_run):
+                        with self.assertRaises(SystemExit) as cm:
+                            module.main()
+            self.assertEqual(cm.exception.code, 3)
+
+    def test_process_artifact_exit_code_mismatch_is_invalid(self):
+        module = self.load_gate_module()
+
+        def fake_run(cmd, label):
+            self.write_tier1_result(tmp, 0)
+            return 1
+
+        with tempfile.TemporaryDirectory() as tmp:
+            with mock.patch.object(sys, "argv", self.gate_argv(tmp)):
+                with mock.patch.object(module, "timestamp", return_value="TS"):
+                    with mock.patch.object(module, "run", fake_run):
+                        with self.assertRaises(SystemExit) as cm:
+                            module.main()
+            self.assertEqual(cm.exception.code, 3)
+
+    def test_unexpected_child_exit_code_is_invalid(self):
+        module = self.load_gate_module()
+        with tempfile.TemporaryDirectory() as tmp:
+            with mock.patch.object(sys, "argv", self.gate_argv(tmp)):
+                with mock.patch.object(module, "timestamp", return_value="TS"):
+                    with mock.patch.object(module, "run", return_value=9):
+                        with self.assertRaises(SystemExit) as cm:
+                            module.main()
+            self.assertEqual(cm.exception.code, 3)
+
+    def test_sys_executable_is_used_for_child_commands(self):
+        module = self.load_gate_module()
+        calls = []
+
+        def fake_run(cmd, label):
+            calls.append(cmd)
+            self.write_tier1_result(tmp, 0)
+            return 0
+
+        with tempfile.TemporaryDirectory() as tmp:
+            with mock.patch.object(sys, "argv", self.gate_argv(tmp)):
+                with mock.patch.object(module, "timestamp", return_value="TS"):
+                    with mock.patch.object(module, "run", fake_run):
+                        with self.assertRaises(SystemExit) as cm:
+                            module.main()
+            self.assertEqual(cm.exception.code, 0)
+            self.assertTrue(calls)
+            self.assertTrue(all(cmd[0] == sys.executable for cmd in calls))
 
 
 class PackageManifestTests(unittest.TestCase):

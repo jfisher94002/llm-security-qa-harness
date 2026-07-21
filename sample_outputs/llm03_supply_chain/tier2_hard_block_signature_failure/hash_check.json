@@ -1,7 +1,7 @@
 {
   "check": "asset_identity",
   "tool": "hashlib sha256 + cryptography Ed25519 verification",
-  "timestamp": "2026-07-20T18:43:14.397062+00:00",
+  "timestamp": "2026-07-21T01:31:25.961064+00:00",
   "model_file": "llm03/fixtures/tier2/approved_artifact.txt",
   "file_name": "approved_artifact.txt",
   "file_size_bytes": 27,

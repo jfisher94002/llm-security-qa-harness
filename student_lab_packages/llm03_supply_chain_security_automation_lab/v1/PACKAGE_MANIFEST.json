@@ -9,23 +9,23 @@
   "payload": [
     {
       "path": "v1/QUICKSTART.md",
-      "sha256": "b446faa228ed576babfc75b9cbd2267ef12d81658fd0e5ddcc5d8c1e148efc4c",
-      "size_bytes": 1903
+      "sha256": "57613f7a3f79cadf04cafc7834cbb38a57ec14602d69aea5b3a8505ac57bd52f",
+      "size_bytes": 1985
     },
     {
       "path": "v1/README.md",
-      "sha256": "3acfbabfc89f915d895f5c902e587b17f17ff49c8001aac8d430d54624924a74",
-      "size_bytes": 914
+      "sha256": "78df4c162f19ec1a38dfe44cdb5fc3367bbbfe78530c9b8ef32733ef4cde8365",
+      "size_bytes": 538
     },
     {
       "path": "v1/demos/llm03_supply_chain_demo.md",
-      "sha256": "21c876fb5f8717f5594ab8d82f297cdb9c28f463a5bb14c6cc354601ae54e3fa",
-      "size_bytes": 6811
+      "sha256": "6c23cb1294e776622ab0f26ab96ae48e7277e6368c571a89f34f9476ee823243",
+      "size_bytes": 7695
     },
     {
       "path": "v1/docs/llm03_results_interpretation.md",
-      "sha256": "5c9ff8a1018141d11f3561cbda5724893c833c69a3b40aee49b0c5c8c9a4c090",
-      "size_bytes": 4784
+      "sha256": "929ba0f295566fbfa712c6e04af84bab1fc3a208bf5de887de003b194a4602f0",
+      "size_bytes": 5603
     },
     {
       "path": "v1/llm03/fixtures/tier1/license_exceptions_expired.json",
@@ -129,33 +129,33 @@
     },
     {
       "path": "v1/llm03/run_llm03.py",
-      "sha256": "c1590705625015bfb8dd0454596034fe2a0881a1200ebaf13258685e8b109d54",
-      "size_bytes": 11473
+      "sha256": "c1c65ab92b6669558e39e3c5941655cc81f29817c5d5fccb2d7fa48b7227afc3",
+      "size_bytes": 15147
     },
     {
       "path": "v1/llm03/tier1_static/generate_license_inventory.py",
-      "sha256": "30e66caa25ba981e179f028df48dcd469bd584c4d918a4f9a2e8ac6e8957512c",
-      "size_bytes": 4114
+      "sha256": "15d7e666103ab1a2988a2ef6fe9c6f5bdd30c83207dd2db4ec348ddd9f129348",
+      "size_bytes": 4992
     },
     {
       "path": "v1/llm03/tier1_static/run_tier1.py",
-      "sha256": "6649f920c4ed950493b3e6b07bceebc3e759b4686acb5da6baf123fef3123b8b",
-      "size_bytes": 18113
+      "sha256": "6d21933242831df2349d30c78bfedf0fd0d598cad44c7aaad002ae3ebc4cf8a8",
+      "size_bytes": 23005
     },
     {
       "path": "v1/llm03/tier2_identity/run_tier2.py",
-      "sha256": "3c37f73f3b854487e892beac78a1d6a67901c8973e82278198fc2c949ca9621e",
-      "size_bytes": 9501
+      "sha256": "8b338a6a2e3c1c9e2e66188c4b229f1b7cbc9cb9c75a9e8220b1f11c72eb4f1e",
+      "size_bytes": 12325
     },
     {
       "path": "v1/llm03/tier3_behavioral/compare_responses.py",
-      "sha256": "ab21b70629c261cfbbe4bbd73a81d3ff9eaac962661a178e9a921e89ccb8d72a",
-      "size_bytes": 5524
+      "sha256": "d50d60ac8e0cbcb7f758ab3a5939668773455f842ba7cbf28130f4adb518d3b3",
+      "size_bytes": 10174
     },
     {
       "path": "v1/llm03/tier3_behavioral/prompts.json",
-      "sha256": "9d2b4e19434ca3ce5b6ddfd47615d89be4049c05567480a9eae1e5618f74e7b5",
-      "size_bytes": 1485
+      "sha256": "d424b080311ef716d6645c5f4d49fd4d9774612a958922386f9d52ef39849675",
+      "size_bytes": 1794
     },
     {
       "path": "v1/llm03/tier3_behavioral/run_probes.py",
@@ -164,198 +164,198 @@
     },
     {
       "path": "v1/requirements.txt",
-      "sha256": "b6a4be4fccc91fae2be8d5bbcfdf5735d4a061d1f8a9b56c24bee52bcf81293f",
-      "size_bytes": 228
+      "sha256": "3b0538366afa4c6f1841f82d750c94f396b2ba34ff6372c5d95bcd6a3dfd8070",
+      "size_bytes": 270
     },
     {
       "path": "v1/sample_outputs/llm03_supply_chain/confirmed_failure_to_regression_test/README.md",
-      "sha256": "0b4e6283bbe697b24ad9babf68cf46e105175f1ed152eb50a07ac7c827562028",
-      "size_bytes": 692
+      "sha256": "f1726475883ebe661f2d833b6e46b81c7ec58990196daabb8c73522d7493f27f",
+      "size_bytes": 481
     },
     {
       "path": "v1/sample_outputs/llm03_supply_chain/confirmed_failure_to_regression_test/regression_test_example.json",
-      "sha256": "e4a0f0eb97bb07c772b03e16c48be54e584550015738486b8325c36d4861069c",
-      "size_bytes": 723
+      "sha256": "6a99fbfcca9f2ef301bae82bcf09457eb68f8f8bc92c9761bf57bbd13e4489a3",
+      "size_bytes": 550
     },
     {
       "path": "v1/sample_outputs/llm03_supply_chain/gate_predeploy_pass/gate_result.json",
-      "sha256": "00b2750e8740b47161501b5577b8b27fab3a9883264ac79726e029baeb270d01",
+      "sha256": "1eabaaffa92253439f380b2ef2fcae391837c56fa6d232d7085e09f4becd035a",
       "size_bytes": 1798
     },
     {
-      "path": "v1/sample_outputs/llm03_supply_chain/gate_predeploy_pass/tier1_20260720T184330/dep_scan.json",
-      "sha256": "3e9bfe180a45bc01a82a031314a895945535e8b679b78469691328920140230f",
+      "path": "v1/sample_outputs/llm03_supply_chain/gate_predeploy_pass/tier1_20260721T013142/dep_scan.json",
+      "sha256": "e1043b9ab1d011117dde4a986ea8895941d2f90449462aebd65131a673a24adf",
       "size_bytes": 455
     },
     {
-      "path": "v1/sample_outputs/llm03_supply_chain/gate_predeploy_pass/tier1_20260720T184330/license_scan.json",
-      "sha256": "37efb35cefaac9815bb3cd50e8f2faf67dd5840ce059c57690854db4fc1e374e",
+      "path": "v1/sample_outputs/llm03_supply_chain/gate_predeploy_pass/tier1_20260721T013142/license_scan.json",
+      "sha256": "beb2533aaed079fbc93813e819d34aebfc831a4edd825bb1206518acfacc9b75",
       "size_bytes": 804
     },
     {
-      "path": "v1/sample_outputs/llm03_supply_chain/gate_predeploy_pass/tier1_20260720T184330/tier1_result.json",
-      "sha256": "39acdf0cee920dd20e66d79eab893f1402dc6907e23a6af4f3fd0428ae5eaf5d",
+      "path": "v1/sample_outputs/llm03_supply_chain/gate_predeploy_pass/tier1_20260721T013142/tier1_result.json",
+      "sha256": "7052d2cf48507c1f92e6c7b35f258db78d6d6805d81f3f82bd2ccadc1b7e39bf",
       "size_bytes": 595
     },
     {
-      "path": "v1/sample_outputs/llm03_supply_chain/gate_predeploy_pass/tier2_20260720T184330/hash_check.json",
-      "sha256": "3fbafb0371193bfda6319e222e7fbe3595abc577379a8b41fcdfa5962aea8099",
+      "path": "v1/sample_outputs/llm03_supply_chain/gate_predeploy_pass/tier2_20260721T013142/hash_check.json",
+      "sha256": "c643a336860c506269fd4f10785777cb203899f754b23925ca02da00cac8fbdf",
       "size_bytes": 710
     },
     {
-      "path": "v1/sample_outputs/llm03_supply_chain/gate_predeploy_pass/tier3_20260720T184330/results.json",
-      "sha256": "94426f1768f371559644f4a4975a332782d93c0dd4a44da0a5806a4b18166dc7",
-      "size_bytes": 1141
+      "path": "v1/sample_outputs/llm03_supply_chain/gate_predeploy_pass/tier3_20260721T013142/results.json",
+      "sha256": "c29b779179cdc04da713faa3cdb3fde662844d4e8d2f2fd8ce42fbbaca6a21eb",
+      "size_bytes": 1627
     },
     {
       "path": "v1/sample_outputs/llm03_supply_chain/gate_release_review_behavioral_drift/gate_result.json",
-      "sha256": "c9b140b9676cc87709f2e3af08a75e5f18846d5e404ea1117a7f045f5662bda8",
+      "sha256": "d29f7e46971af0738c0c8305a9cc9d1b5411abef1d3644cf725d35b8b6a19a6e",
       "size_bytes": 2089
     },
     {
       "path": "v1/sample_outputs/llm03_supply_chain/gate_release_review_behavioral_drift/review_gate.json",
-      "sha256": "a28289153818ff144d250d4d4d1d95c6d4a2ebf880773c9370d002d71b498dd0",
-      "size_bytes": 572
+      "sha256": "8e6c7973950ab2ca6698549b3baea950f4c2abd4faddcd02d151bfee9931b3fd",
+      "size_bytes": 242
     },
     {
-      "path": "v1/sample_outputs/llm03_supply_chain/gate_release_review_behavioral_drift/tier1_20260720T184330/dep_scan.json",
-      "sha256": "f53a179193c777ae6fe6707cb6ec6130f47f6325e7ac02d821810bdd563dbb37",
+      "path": "v1/sample_outputs/llm03_supply_chain/gate_release_review_behavioral_drift/tier1_20260721T013142/dep_scan.json",
+      "sha256": "fd3078cbc0dfa7b556f11f8a26a85b5adf597e7cedf78cbd675649247ab087c6",
       "size_bytes": 455
     },
     {
-      "path": "v1/sample_outputs/llm03_supply_chain/gate_release_review_behavioral_drift/tier1_20260720T184330/license_scan.json",
-      "sha256": "1f6da551ea40f2e46a3d4b9c30dbd07bf2b96dd11720f5ce254a7c0b14f14f93",
+      "path": "v1/sample_outputs/llm03_supply_chain/gate_release_review_behavioral_drift/tier1_20260721T013142/license_scan.json",
+      "sha256": "76ff4b2d26d6cdad55d8fd2055acdea910133aa1223cace5bc627de6056f6fc0",
       "size_bytes": 804
     },
     {
-      "path": "v1/sample_outputs/llm03_supply_chain/gate_release_review_behavioral_drift/tier1_20260720T184330/tier1_result.json",
-      "sha256": "8b4797175ff3fd261211fc9df49ff20bcf8bf9347d26b73a42715e2b966e6e7b",
+      "path": "v1/sample_outputs/llm03_supply_chain/gate_release_review_behavioral_drift/tier1_20260721T013142/tier1_result.json",
+      "sha256": "bb9160cc0e8e2ab98861b2b4a9e480968ed32183de0f8cceb98077c5afc96588",
       "size_bytes": 629
     },
     {
-      "path": "v1/sample_outputs/llm03_supply_chain/gate_release_review_behavioral_drift/tier2_20260720T184330/hash_check.json",
-      "sha256": "a5a60d2e5e1b1ef79b6933e68c72e58e5a48e3f9880d729f917680211bfb6b67",
+      "path": "v1/sample_outputs/llm03_supply_chain/gate_release_review_behavioral_drift/tier2_20260721T013142/hash_check.json",
+      "sha256": "88867d73e3cee4040d935d3cfeb0ea07fca6a77114b507c2fc00193f93bf354d",
       "size_bytes": 710
     },
     {
-      "path": "v1/sample_outputs/llm03_supply_chain/gate_release_review_behavioral_drift/tier3_20260720T184330/results.json",
-      "sha256": "a491bf25f18f3aa3ac95b43140e80a6aa101dcf7df2d197e4e9deb94c22e323f",
-      "size_bytes": 1182
+      "path": "v1/sample_outputs/llm03_supply_chain/gate_release_review_behavioral_drift/tier3_20260721T013142/results.json",
+      "sha256": "3ba6dc7653d3c3c8bead9f97c00ffaaa187d70f5359ebce2dd57cfa0baed2e8f",
+      "size_bytes": 1665
     },
     {
       "path": "v1/sample_outputs/llm03_supply_chain/gate_tier1_hard_block/gate_result.json",
-      "sha256": "f87ff392e6cd65efe66db17269dc9dc5a50294650da24bf26184a8c9e49c6416",
+      "sha256": "eb0ff7a7151e7f9843dfa920fd0e65baaef645e8d0c1cb1e63d456dce9aa09b3",
       "size_bytes": 1040
     },
     {
-      "path": "v1/sample_outputs/llm03_supply_chain/gate_tier1_hard_block/tier1_20260720T184330/dep_scan.json",
-      "sha256": "684b703fcc1fb082b5b2cb3a2ba164d1229bcb3eb3a19005ef1dd7c62bbc927a",
+      "path": "v1/sample_outputs/llm03_supply_chain/gate_tier1_hard_block/tier1_20260721T013142/dep_scan.json",
+      "sha256": "cbe2b1a5c34cf45040909208b4b2e6d18be952f6b601408777e4fa8b20afe443",
       "size_bytes": 1305
     },
     {
-      "path": "v1/sample_outputs/llm03_supply_chain/gate_tier1_hard_block/tier1_20260720T184330/license_scan.json",
-      "sha256": "9034a1d684e7e5b245d44de9996d39def24ba60f55008a2bee4a0c4e75798ef5",
+      "path": "v1/sample_outputs/llm03_supply_chain/gate_tier1_hard_block/tier1_20260721T013142/license_scan.json",
+      "sha256": "ebe53d4854297e2c4cb592289ad2a24a175241c6696f639d5868d2329ee40bee",
       "size_bytes": 804
     },
     {
-      "path": "v1/sample_outputs/llm03_supply_chain/gate_tier1_hard_block/tier1_20260720T184330/tier1_result.json",
-      "sha256": "f6bc1bafbdfe80e4edc90ac88c2002a0290de89ca55ad21cd726c2a1ab2f296f",
+      "path": "v1/sample_outputs/llm03_supply_chain/gate_tier1_hard_block/tier1_20260721T013142/tier1_result.json",
+      "sha256": "d98742ac687ec821dc5115bde558671fecc374035b64980ddaae23e212455ae2",
       "size_bytes": 603
     },
     {
       "path": "v1/sample_outputs/llm03_supply_chain/review_examples/approval_records/dataset_provenance_question.approval_record.json",
-      "sha256": "e6ef20ed299d71e871a38b12e05562ad246dab5e18a83ef9230fd8d7b5e910a2",
-      "size_bytes": 610
+      "sha256": "2b183560e9c0e08436738dde5b32d716644fdc314a153fe398858f1832820f74",
+      "size_bytes": 459
     },
     {
       "path": "v1/sample_outputs/llm03_supply_chain/review_examples/approval_records/license_exception.approval_record.json",
-      "sha256": "c2248e32f4b0c1922ed1d5a73b11adb9e4b01d89e1b901afb484da64f55d8af0",
-      "size_bytes": 616
+      "sha256": "b850cf916c5a4c3a70b2d00077d5f90a6732bd5c2b0e766354457c3bc97a7d8b",
+      "size_bytes": 529
     },
     {
       "path": "v1/sample_outputs/llm03_supply_chain/review_examples/approval_records/supplier_terms_change.approval_record.json",
-      "sha256": "5b2fd0b837318a7e41f73f5a3918f241f6817ed7a0148475056e9f953551206e",
-      "size_bytes": 687
+      "sha256": "a9544bad5ce6a8bb58c3c1f62cc897a9235720cd771d55b38246ca60f591f141",
+      "size_bytes": 441
     },
     {
       "path": "v1/sample_outputs/llm03_supply_chain/review_examples/review_gate.json",
-      "sha256": "d24b8d0d7d90528bca9e7bae801227a00a4671c2d276e2871e581956d22fbac6",
-      "size_bytes": 449
+      "sha256": "ac7ef24b416f0a4a2e0a41ec1e9fd17ce6cec4916909f95c255ddfa3c3998213",
+      "size_bytes": 616
     },
     {
       "path": "v1/sample_outputs/llm03_supply_chain/tier1_hard_block_critical_cve/dep_scan.json",
-      "sha256": "9f975ad02adcc3f2eebcb869cb019747325fdf9a4ae0ef0ec658ca6a98c2ac6b",
+      "sha256": "0b38073ccb836aab548d78b6ed12f26d3929e5471f73faa238e95dea2c7da62f",
       "size_bytes": 1305
     },
     {
       "path": "v1/sample_outputs/llm03_supply_chain/tier1_hard_block_critical_cve/license_scan.json",
-      "sha256": "b9dd855486717fd67307f2b4fb80bed301af31a8e51394c04623b4b689537a8b",
+      "sha256": "1045f3aed567b05b11636109015d346f5232c7351834e0c18ce5c839dfcde9ed",
       "size_bytes": 804
     },
     {
       "path": "v1/sample_outputs/llm03_supply_chain/tier1_hard_block_critical_cve/tier1_result.json",
-      "sha256": "3fb993d61714f57163525a7fefec15bbe6d7710932f8edc715c6cd2fb5950237",
+      "sha256": "0d464b22d1c0aff0fe614e407797dcdb1773e21aadec56ee042a9584c7f52168",
       "size_bytes": 575
     },
     {
       "path": "v1/sample_outputs/llm03_supply_chain/tier1_pass_with_warnings_and_exception/dep_scan.json",
-      "sha256": "d24cb3fad1ae595e0f8f56e0cee8d26e47c43b0e93f486086369029a4904b39e",
+      "sha256": "b5af2617b2f6bd8e610b42026fdb51ae4193e6741b38d8521a0c5072b0575992",
       "size_bytes": 1343
     },
     {
       "path": "v1/sample_outputs/llm03_supply_chain/tier1_pass_with_warnings_and_exception/license_scan.json",
-      "sha256": "23d7f4c41af275ce6c744db877e131758b25e343d0bcdc136dd431d058636d6f",
+      "sha256": "6b11fb8e9fa92a9618318b3c4f24b6718387b780acc94cbfba9ff3b9010b5fa0",
       "size_bytes": 1422
     },
     {
       "path": "v1/sample_outputs/llm03_supply_chain/tier1_pass_with_warnings_and_exception/tier1_result.json",
-      "sha256": "1ae92d10ed2d54f8e6968996b1ed3b8c43759b8685559d9886a6b43effff9352",
+      "sha256": "cc139f10fa0265f541655fe8543092ecaab44036d418cf6b41b558299ba43909",
       "size_bytes": 589
     },
     {
       "path": "v1/sample_outputs/llm03_supply_chain/tier1_review_unknown_cve/dep_scan.json",
-      "sha256": "ec2e6e3fc700aea0ab52661bebf3ee4ad7ed8037ebfe893cbea1721ed207bc1b",
+      "sha256": "d56c8904a2d2dd1d4d6d70ee0c68016cdadd3a4eebfbab10ab81a26a4c884abc",
       "size_bytes": 1275
     },
     {
       "path": "v1/sample_outputs/llm03_supply_chain/tier1_review_unknown_cve/license_scan.json",
-      "sha256": "4f742e2195a123645569f35a5cb27090caa6ab67465cfeca74128668a2c87f11",
+      "sha256": "d9d7e80b638aaab85743832944ac2ae7e3cf52c805d10249ee29870bfeea8066",
       "size_bytes": 804
     },
     {
       "path": "v1/sample_outputs/llm03_supply_chain/tier1_review_unknown_cve/review_gate.json",
-      "sha256": "adfb8a455d41362bc91d3267ef284394f8b95dafa4038d3a4db006340389279e",
+      "sha256": "89e397fb6984544620caaf5e139ae7cdca52425882b72165e4e68f63b2b15514",
       "size_bytes": 615
     },
     {
       "path": "v1/sample_outputs/llm03_supply_chain/tier1_review_unknown_cve/tier1_result.json",
-      "sha256": "5ecfb0bd63791568656bd8c5fd4e891e8b78a5d7dc32bbe170dba17b191ac9c6",
+      "sha256": "8f72b7a420ceef883cda7e43ae0d947d912b41cf492a7d37281901b5bdbe864e",
       "size_bytes": 643
     },
     {
       "path": "v1/sample_outputs/llm03_supply_chain/tier2_hard_block_hash_mismatch/hash_check.json",
-      "sha256": "d8f9fbdd9c81de39ddcdf5f2398b71a6aaebbde7aec8e3122d5dc43e689cbe59",
+      "sha256": "42c257188b465fc42cc748015b4f715409b7061baaf359c5d1cebf46c9fc0ae4",
       "size_bytes": 686
     },
     {
       "path": "v1/sample_outputs/llm03_supply_chain/tier2_hard_block_signature_failure/hash_check.json",
-      "sha256": "5f778cfcdba129e6f3a02de303c8faf8e3477e5bef301a718ddb9ff85915cfa8",
+      "sha256": "7c148398383e6f1a5855f0b912e895488f178c45901e33be8f18b60451debdb1",
       "size_bytes": 764
     },
     {
       "path": "v1/sample_outputs/llm03_supply_chain/tier2_pass/hash_check.json",
-      "sha256": "acd70198e7b93807b3355c91833af51681cef6529dc63c9ec121db02d8145777",
+      "sha256": "316cee968eab7553ec88e0f4dc03dadfe609fd95973ef8b91072e86d99de3ed9",
       "size_bytes": 710
     },
     {
       "path": "v1/sample_outputs/llm03_supply_chain/tier3_pass/results.json",
-      "sha256": "d6ce904d085b4cc0affb7b2f562a9bdaae054b7752cc2d5e4db66cb6db3da6c4",
-      "size_bytes": 1141
+      "sha256": "37ebd4ded60858a6796ae20b728552bb183a297d44029546474da5839f23c3a5",
+      "size_bytes": 1627
     },
     {
       "path": "v1/sample_outputs/llm03_supply_chain/tier3_review_behavioral_drift/results.json",
-      "sha256": "8a994d3207a32ff7b24c537a6beedd4b7594f12a3691c470f5cf3779091e51ef",
-      "size_bytes": 1182
+      "sha256": "deecffc5fe6d2439a5317b903c76444c545f9170fb836f97d7efbbd0aa11dbcb",
+      "size_bytes": 1665
     },
     {
       "path": "v1/test_cases/llm03_supply_chain/behavioral_regression.json",
@@ -379,21 +379,8 @@
     },
     {
       "path": "v1/tests/test_llm03_supply_chain.py",
-      "sha256": "d1d864462ed78f4453ea858f8afa1646a07d028c9ceb1ec8a3a099dd4dd3f964",
-      "size_bytes": 24864
+      "sha256": "6584b30fbcb62e681d1db2b89ac45cba92f4928807d4e9d19511c45693555c14",
+      "size_bytes": 46039
     }
-  ],
-  "excluded": [
-    "generated Python caches",
-    "temporary runtime output",
-    "credentials",
-    "real model files",
-    "real vulnerability data",
-    "LLM01/LLM02 full harness content"
-  ],
-  "notes": [
-    "Fixtures use fake CVE IDs and fake package data.",
-    "The Tier 2 artifact is a tiny text fixture, not a model file.",
-    "Passing checks does not prove supply chain security."
   ]
 }

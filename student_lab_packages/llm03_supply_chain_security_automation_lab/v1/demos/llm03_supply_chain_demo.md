@@ -5,8 +5,8 @@ This demo covers the three-tier supply chain harness for LLM-03. Each tier cover
 ## Prerequisites
 
 - Python 3.10 or newer
-- `cryptography` installed with `python3 -m pip install -r requirements.txt`
-- `pip-audit` installed only for live dependency scans; offline fixtures do not need it
+- a lab-tools environment with `cryptography`, `requests`, `pip-audit`, and `pip-licenses` installed with `python3 -m pip install -r requirements.txt`
+- a separate target environment containing only the application dependencies being evaluated
 - Ollama running locally with at least one model pulled (for Tier 3)
 - A requirements file and target license inventory to scan (Tier 1 live mode)
 - A model file to verify (Tier 2, optional for walkthrough)
@@ -36,26 +36,36 @@ python3 llm03/tier1_static/run_tier1.py \
 macOS/Linux:
 
 ```bash
-python3 -m venv .venv-llm03-target
-source .venv-llm03-target/bin/activate
+python3 -m venv .venv-llm03-tools
+source .venv-llm03-tools/bin/activate
 python3 -m pip install -r requirements.txt
-python3 -m pip install pip-licenses
+
+python3 -m venv .venv-llm03-target
+.venv-llm03-target/bin/python -m pip install -r requirements.txt
+
 python3 llm03/tier1_static/generate_license_inventory.py \
     --requirements requirements.txt \
+    --target-python .venv-llm03-target/bin/python \
     --output target_license_inventory.json
 ```
 
 Windows PowerShell:
 
 ```powershell
-py -3.10 -m venv .venv-llm03-target
-.\.venv-llm03-target\Scripts\Activate.ps1
+py -3.10 -m venv .venv-llm03-tools
+.\.venv-llm03-tools\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
-python -m pip install pip-licenses
+
+py -3.10 -m venv .venv-llm03-target
+.\.venv-llm03-target\Scripts\python.exe -m pip install -r requirements.txt
+
 python llm03\tier1_static\generate_license_inventory.py `
     --requirements requirements.txt `
+    --target-python .\.venv-llm03-target\Scripts\python.exe `
     --output target_license_inventory.json
 ```
+
+The scanner runs from the lab-tools environment and inspects the target Python environment, so the inventory does not include `pip-licenses` merely because the scanner is installed.
 
 ### Fail signal
 - A mapped Critical CVE is a hard block
@@ -142,11 +152,12 @@ python3 llm03/tier3_behavioral/compare_responses.py \
 ### Fail signal
 - A refusal prompt now produces a response containing failure keywords
 - A keyword-match prompt is missing required keywords
+- A current response is below the prompt's configured `baseline_similarity_threshold`
 
 ### Evidence produced
 - `baseline.json` — approved baseline responses
 - `current.json` — current run responses
-- `results.json` — per-prompt comparison, overall pass/fail
+- `results.json` — per-prompt rule result, baseline similarity score, configured threshold, drift result, and final prompt result
 
 ---
 
@@ -186,7 +197,7 @@ python3 llm03/run_llm03.py --gate release \
 
 ### CI/CD integration
 
-The harness exits 0 on pass and 1 on any failure. Wire it into your pipeline as a blocking step.
+The harness exits with distinct codes for pass, review, hard block, and invalid configuration. Wire nonzero results into your pipeline policy instead of treating every nonzero result as the same failure.
 
 ```yaml
 - name: LLM-03 pre-merge supply chain check
@@ -212,6 +223,7 @@ Edit `llm03/tier3_behavioral/prompts.json`. Each prompt needs:
 - `id` — unique identifier
 - `prompt` — the exact text sent to the model
 - `check_type` — `refusal` or `keyword_match`
+- `baseline_similarity_threshold` — deterministic normalized-text similarity threshold from 0.0 to 1.0
 - `failure_keywords` (refusal) or `required_keywords` (keyword_match)
 - `pass_condition` — plain-language description of what passing looks like
 

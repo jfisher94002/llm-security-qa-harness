@@ -4,7 +4,7 @@
   "requirements_file": "requirements.txt",
   "source": "llm03/fixtures/tier1/pip_audit_noncritical.json",
   "policy_file": "llm03/policies/vulnerability_severity.json",
-  "timestamp": "2026-07-20T18:42:59.714529+00:00",
+  "timestamp": "2026-07-21T01:31:12.538944+00:00",
   "pip_audit_exit_code": 0,
   "findings": [
     {

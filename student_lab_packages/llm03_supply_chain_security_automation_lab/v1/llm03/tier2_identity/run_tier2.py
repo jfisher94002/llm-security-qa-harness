@@ -52,7 +52,56 @@ def compute_sha256(file_path, chunk_size=65536):
 
 def load_manifest(manifest_path):
     with open(manifest_path, encoding="utf-8") as f:
-        return json.load(f)
+        manifest = json.load(f)
+    validate_manifest(manifest)
+    return manifest
+
+
+def is_sha256_hex(value):
+    return (
+        isinstance(value, str)
+        and len(value) == 64
+        and all(ch in "0123456789abcdefABCDEF" for ch in value)
+    )
+
+
+def validate_manifest(manifest):
+    if not isinstance(manifest, dict):
+        raise ValueError("manifest root must be an object")
+    models = manifest.get("models")
+    if not isinstance(models, list):
+        raise ValueError("manifest models must be an array")
+    seen = set()
+    for index, entry in enumerate(models):
+        if not isinstance(entry, dict):
+            raise ValueError(f"manifest models[{index}] must be an object")
+        file_name = entry.get("file_name")
+        if not isinstance(file_name, str) or not file_name.strip():
+            raise ValueError(f"manifest models[{index}].file_name must be a non-empty string")
+        if os.path.isabs(file_name) or os.path.basename(file_name) != file_name:
+            raise ValueError(f"manifest models[{index}].file_name must be a relative file name")
+        if file_name in seen:
+            raise ValueError(f"manifest contains duplicate file_name: {file_name}")
+        seen.add(file_name)
+        sha256 = entry.get("sha256")
+        if sha256 != "REPLACE_WITH_ACTUAL_SHA256_HASH" and not is_sha256_hex(sha256):
+            raise ValueError(f"manifest models[{index}].sha256 must be a 64-character hex digest")
+        for path_field in ("signature_file", "public_key_file"):
+            if path_field in entry and entry[path_field] is not None:
+                if not isinstance(entry[path_field], str) or not entry[path_field].strip():
+                    raise ValueError(f"manifest models[{index}].{path_field} must be a non-empty string")
+                if os.path.isabs(entry[path_field]):
+                    raise ValueError(f"manifest models[{index}].{path_field} must be a relative path")
+        public_key = entry.get("ed25519_public_key")
+        if public_key is not None:
+            if not isinstance(public_key, str):
+                raise ValueError(f"manifest models[{index}].ed25519_public_key must be a hex string")
+            try:
+                public_key_bytes = bytes.fromhex("".join(public_key.split()))
+            except ValueError as exc:
+                raise ValueError(f"manifest models[{index}].ed25519_public_key must be valid hex: {exc}") from None
+            if len(public_key_bytes) != 32:
+                raise ValueError(f"manifest models[{index}].ed25519_public_key must decode to 32 bytes")
 
 
 def find_manifest_entry(manifest, file_name):
@@ -149,10 +198,15 @@ def main():
         manifest = load_manifest(args.manifest)
     except json.JSONDecodeError as exc:
         invalid_artifact(args, out_path, "INVALID_MANIFEST_JSON", f"manifest JSON is invalid: {exc}")
+    except (OSError, ValueError) as exc:
+        invalid_artifact(args, out_path, "INVALID_MANIFEST", f"manifest is invalid: {exc}")
 
     file_name = os.path.basename(args.model_file)
-    file_size = os.path.getsize(args.model_file)
-    actual_hash = compute_sha256(args.model_file)
+    try:
+        file_size = os.path.getsize(args.model_file)
+        actual_hash = compute_sha256(args.model_file)
+    except OSError as exc:
+        invalid_artifact(args, out_path, "INVALID_MODEL_FILE", f"model file could not be read: {exc}")
     entry = find_manifest_entry(manifest, file_name)
 
     artifact = {

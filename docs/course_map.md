@@ -121,4 +121,4 @@ python3 llm03/run_llm03.py --gate release \
     --current-responses-json llm03/fixtures/tier3/current_pass.json
 ```
 
-Focus on whether the dependency set is clean, the model artifact matches the approved hash, and the application behavior still matches the release-approved baseline.
+Focus on whether the dependency set is clean, the model artifact matches the approved hash, and the application behavior still passes the configured rules plus the release-approved baseline similarity thresholds.

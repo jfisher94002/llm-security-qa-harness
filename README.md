@@ -98,7 +98,7 @@ The LLM-03 harness runs three tiers in order and stops when an earlier tier fail
 |------|-------|--------|----------|
 | 1 | Static code | dependency severity policy, target license inventory | Critical CVE hard block; unknown CVE or unapproved restricted license review |
 | 2 | Asset identity | SHA-256 and optional Ed25519 signature | Missing/mismatched hash or signature failure |
-| 3 | Behavioral | Fixed prompts, temp 0, fresh sessions | Drift requiring human review |
+| 3 | Behavioral | Fixed prompts, temp 0, fresh sessions, rule checks plus per-prompt baseline similarity thresholds | Drift requiring human review |
 
 ```bash
 # Pre-merge: dependency and license scan only
@@ -130,7 +130,7 @@ python3 llm03/run_llm03.py --record-baseline --model llama3.2:3b
 
 See `demos/llm03_supply_chain_demo.md` for a full step-by-step walkthrough.
 
-Install dependencies before LLM03 Tier 2 signature checks:
+Install dependencies before live LLM03 scans, probes, or Tier 2 signature checks:
 
 ```bash
 python3 -m pip install -r requirements.txt

@@ -1,30 +1,9 @@
-# LLM03 Supply Chain Security Automation Lab v1
+# LLM03 Supply Chain Security Automation Lab
 
-This package is a standalone teaching subset for the OWASP LLM-03 Supply Chain Security Automation Lab.
+Version: v1
 
-It contains fake, reproducible fixtures only. It does not contain real credentials, real customer data, real private prompts, real model files, or real vulnerability records.
+This package contains the offline-friendly LLM-03 course lab: Tier 1 static checks, Tier 2 asset identity checks, Tier 3 behavioral baseline comparison, policies, fixtures, checked-in evidence, review examples, approval examples, and tests.
 
-## Start
+Python 3.10 or newer is required. Passing these checks does not prove a system is secure; it only means the configured checks passed for the supplied inputs.
 
-Install dependencies:
-
-```bash
-python3 -m pip install -r requirements.txt
-```
-
-Run the offline pre-merge gate:
-
-```bash
-python3 llm03/run_llm03.py --gate pre-merge \
-    --pip-audit-json llm03/fixtures/tier1/pip_audit_pass.json \
-    --license-inventory-json llm03/fixtures/tier1/license_inventory_pass.json \
-    --output ./tmp_results/llm03-pre-merge
-```
-
-Then read:
-
-- `QUICKSTART.md`
-- `demos/llm03_supply_chain_demo.md`
-- `docs/llm03_results_interpretation.md`
-
-Passing the lab checks does not prove a model, dependency set, artifact, or deployment pipeline is secure.
+Start with `QUICKSTART.md`, then read `docs/llm03_results_interpretation.md`.

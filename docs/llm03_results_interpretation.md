@@ -56,17 +56,26 @@ The license scan must use a target dependency inventory. A scan of the wrong Pyt
 
 ## Generating A Target License Inventory
 
-Run the generator inside the isolated environment that contains the exact target dependencies.
+Use two environments:
+
+- `lab-tools`: contains the harness and scanners from `requirements.txt`
+- `target`: contains only the application dependencies being evaluated
+
+Run `pip-licenses` from `lab-tools` with `--target-python` pointing at the target environment. This keeps scanner dependencies such as `pip-licenses` out of the target license inventory.
 
 macOS/Linux:
 
 ```bash
-python3 -m venv .venv-llm03-target
-source .venv-llm03-target/bin/activate
+python3 -m venv .venv-llm03-tools
+source .venv-llm03-tools/bin/activate
 python3 -m pip install -r requirements.txt
-python3 -m pip install pip-licenses
+
+python3 -m venv .venv-llm03-target
+.venv-llm03-target/bin/python -m pip install -r requirements.txt
+
 python3 llm03/tier1_static/generate_license_inventory.py \
     --requirements requirements.txt \
+    --target-python .venv-llm03-target/bin/python \
     --output target_license_inventory.json
 python3 llm03/run_llm03.py --gate pre-merge \
     --requirements requirements.txt \
@@ -76,19 +85,23 @@ python3 llm03/run_llm03.py --gate pre-merge \
 Windows PowerShell:
 
 ```powershell
-py -3.10 -m venv .venv-llm03-target
-.\.venv-llm03-target\Scripts\Activate.ps1
+py -3.10 -m venv .venv-llm03-tools
+.\.venv-llm03-tools\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
-python -m pip install pip-licenses
+
+py -3.10 -m venv .venv-llm03-target
+.\.venv-llm03-target\Scripts\python.exe -m pip install -r requirements.txt
+
 python llm03\tier1_static\generate_license_inventory.py `
     --requirements requirements.txt `
+    --target-python .\.venv-llm03-target\Scripts\python.exe `
     --output target_license_inventory.json
 python llm03\run_llm03.py --gate pre-merge `
     --requirements requirements.txt `
     --license-inventory-json target_license_inventory.json
 ```
 
-The generator records the requirements filename, requirements SHA-256, generator path, Python version, generation timestamp, and package list. It does not record absolute local paths.
+The generator records the requirements filename, requirements SHA-256, generator path, lab-tools Python version, target Python executable name, generation timestamp, and package list. It does not record absolute local paths.
 
 ## Tier 2: Asset Identity
 
@@ -109,12 +122,14 @@ The fixture artifact under `llm03/fixtures/tier2/` is fake training data. Do not
 
 ## Tier 3: Behavioral Regression
 
+Each prompt in `llm03/tier3_behavioral/prompts.json` has a `baseline_similarity_threshold`. The comparator normalizes whitespace/case and uses `difflib.SequenceMatcher`; a prompt must pass both its configured rule and its similarity threshold.
+
 Tier 3 writes:
 
 - current response artifact, unless supplied with `--current-responses-json`
 - `results.json`
 
-Behavioral drift exits `1` because it needs human review. The comparator does not prove the new model is unsafe; it shows that the configured baseline checks changed enough to require review.
+Behavioral drift exits `1` because it needs human review. The comparator does not prove the new model is unsafe; it shows that the configured rule or baseline similarity checks changed enough to require review.
 
 If `run_probes.py` fails, the gate stops before comparison. A failed probe run is a tool/configuration failure, not behavioral evidence.
 

@@ -43,6 +43,7 @@ DEFAULT_RESTRICTED_LICENSES = {
     "AGPL-3.0-only",
 }
 NON_CRITICAL_SEVERITIES = {"low", "medium", "moderate", "high"}
+KNOWN_SEVERITIES = NON_CRITICAL_SEVERITIES | {"critical"}
 PIP_AUDIT_TIMEOUT_SECONDS = 120
 REQUIRED_INVENTORY_FIELDS = {
     "source": str,
@@ -82,19 +83,42 @@ def normalize_vulnerability_id(value):
 
 def load_vulnerability_policy(path):
     data = load_json(path)
+    if not isinstance(data, dict):
+        raise ValueError("vulnerability policy must be an object")
+    hard_block_severities = data.get("hard_block_severities", ["critical"])
+    if not isinstance(hard_block_severities, list) or not hard_block_severities:
+        raise ValueError("vulnerability policy hard_block_severities must be a non-empty list")
+    normalized_hard_blocks = set()
+    for index, severity in enumerate(hard_block_severities):
+        if not isinstance(severity, str) or not severity.strip():
+            raise ValueError(f"vulnerability policy hard_block_severities[{index}] must be a non-empty string")
+        normalized = severity.strip().lower()
+        if normalized not in KNOWN_SEVERITIES:
+            raise ValueError(f"vulnerability policy hard_block_severities[{index}] has unknown severity: {severity}")
+        normalized_hard_blocks.add(normalized)
+
+    vulnerabilities = data.get("vulnerabilities")
+    if not isinstance(vulnerabilities, dict):
+        raise ValueError("vulnerability policy vulnerabilities must be an object")
     severity_map = {}
-    for vuln_id, details in data.get("vulnerabilities", {}).items():
+    for vuln_id, details in vulnerabilities.items():
+        if not isinstance(vuln_id, str) or not vuln_id.strip():
+            raise ValueError("vulnerability policy vulnerability IDs must be non-empty strings")
         if isinstance(details, str):
             severity = details
-        else:
+        elif isinstance(details, dict):
             severity = details.get("severity")
-        if severity:
-            severity_map[normalize_vulnerability_id(vuln_id)] = severity.lower()
+        else:
+            raise ValueError(f"vulnerability policy entry for {vuln_id} must be a string or object")
+        if not isinstance(severity, str) or not severity.strip():
+            raise ValueError(f"vulnerability policy entry for {vuln_id} must include a severity string")
+        normalized_severity = severity.strip().lower()
+        if normalized_severity not in KNOWN_SEVERITIES:
+            raise ValueError(f"vulnerability policy entry for {vuln_id} has unknown severity: {severity}")
+        severity_map[normalize_vulnerability_id(vuln_id)] = normalized_severity
     return {
         "path": path,
-        "hard_block_severities": {
-            str(s).lower() for s in data.get("hard_block_severities", ["critical"])
-        },
+        "hard_block_severities": normalized_hard_blocks,
         "severity_map": severity_map,
     }
 
@@ -135,13 +159,51 @@ def load_pip_audit_data(requirements_file, fixture_path):
 
 def iter_pip_audit_dependencies(data):
     if isinstance(data, list):
-        return data
+        dependencies = data
     if isinstance(data, dict):
         if isinstance(data.get("dependencies"), list):
-            return data["dependencies"]
-        if isinstance(data.get("results"), list):
-            return data["results"]
-    raise ValueError("unsupported pip-audit JSON shape; expected a list or a dependencies/results object")
+            dependencies = data["dependencies"]
+        elif isinstance(data.get("results"), list):
+            dependencies = data["results"]
+        else:
+            raise ValueError("unsupported pip-audit JSON shape; expected dependencies or results array")
+    elif not isinstance(data, list):
+        raise ValueError("unsupported pip-audit JSON shape; expected a list or an object")
+
+    for index, item in enumerate(dependencies):
+        if not isinstance(item, dict):
+            raise ValueError(f"pip-audit dependency[{index}] must be an object")
+        package = item.get("name") or item.get("package")
+        version = item.get("version") or item.get("installed_version")
+        if not isinstance(package, str) or not package.strip():
+            raise ValueError(f"pip-audit dependency[{index}] must include a non-empty name/package")
+        if version is not None and not isinstance(version, str):
+            raise ValueError(f"pip-audit dependency[{index}] version must be a string when present")
+        vulns = item.get("vulns", [])
+        if not isinstance(vulns, list):
+            raise ValueError(f"pip-audit dependency[{index}].vulns must be an array")
+        for vuln_index, vuln in enumerate(vulns):
+            if not isinstance(vuln, dict):
+                raise ValueError(f"pip-audit dependency[{index}].vulns[{vuln_index}] must be an object")
+            for key in ("id", "vuln_id", "cve", "ghsa"):
+                if key in vuln and vuln[key] is not None and not isinstance(vuln[key], str):
+                    raise ValueError(f"pip-audit dependency[{index}].vulns[{vuln_index}].{key} must be a string")
+            aliases = vuln.get("aliases", [])
+            if aliases is not None and (
+                not isinstance(aliases, list) or any(not isinstance(alias, str) for alias in aliases)
+            ):
+                raise ValueError(f"pip-audit dependency[{index}].vulns[{vuln_index}].aliases must be a string array")
+            fix_versions = vuln.get("fix_versions", [])
+            if fix_versions is not None and (
+                not isinstance(fix_versions, list) or any(not isinstance(version, str) for version in fix_versions)
+            ):
+                raise ValueError(
+                    f"pip-audit dependency[{index}].vulns[{vuln_index}].fix_versions must be a string array"
+                )
+            description = vuln.get("description", "")
+            if description is not None and not isinstance(description, str):
+                raise ValueError(f"pip-audit dependency[{index}].vulns[{vuln_index}].description must be a string")
+    return dependencies
 
 
 def extract_vuln_ids(vuln):
@@ -214,6 +276,12 @@ def load_license_inventory(path):
     if len(requirements_sha) != 64 or any(ch not in "0123456789abcdefABCDEF" for ch in requirements_sha):
         raise ValueError("license inventory requirements_sha256 must be a 64-character hex digest")
     packages = data["packages"]
+    try:
+        generated_at = datetime.fromisoformat(data["generated_at"].replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise ValueError("license inventory generated_at must be an ISO-8601 timestamp") from exc
+    if generated_at.tzinfo is None:
+        raise ValueError("license inventory generated_at must include a timezone")
     for index, package in enumerate(packages):
         if not isinstance(package, dict):
             raise ValueError(f"license inventory packages[{index}] must be an object")
@@ -222,6 +290,8 @@ def load_license_inventory(path):
                 raise ValueError(f"license inventory packages[{index}] missing required field: {field}")
             if not isinstance(package[field], str):
                 raise ValueError(f"license inventory packages[{index}].{field} must be a string")
+            if not package[field].strip():
+                raise ValueError(f"license inventory packages[{index}].{field} must be non-empty")
     return packages, data["source"], data
 
 
@@ -229,7 +299,14 @@ def load_license_exceptions(path):
     if not path or not os.path.exists(path):
         return []
     data = load_json(path)
-    exceptions = data.get("exceptions", data if isinstance(data, list) else [])
+    if isinstance(data, list):
+        exceptions = data
+    elif isinstance(data, dict):
+        if "exceptions" not in data:
+            raise ValueError("license exceptions object must include an exceptions array")
+        exceptions = data["exceptions"]
+    else:
+        raise ValueError("license exceptions must be an array or an object with an exceptions array")
     if not isinstance(exceptions, list):
         raise ValueError("license exceptions must be a list or an object with an exceptions list")
     for index, exception in enumerate(exceptions):

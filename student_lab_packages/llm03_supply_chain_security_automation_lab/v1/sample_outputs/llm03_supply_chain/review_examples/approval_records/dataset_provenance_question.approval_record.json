@@ -1,14 +1,10 @@
 {
-  "record_type": "approval_record",
-  "approval_category": "dataset_provenance_question",
-  "decision": "not_approved_pending_evidence",
+  "approval_type": "dataset_provenance_question",
+  "status": "requires_follow_up",
   "timestamp": "2026-01-16T00:00:00+00:00",
-  "approver": "QA Security Training Board",
-  "ticket": "TRAINING-LLM03-DATA-003",
-  "dataset": "example-support-transcripts-synthetic-v2",
-  "question": "Fake dataset card does not identify how synthetic support records were generated.",
-  "required_follow_up": "Attach provenance note and generator prompt review before release approval.",
-  "evidence": [
-    "test_cases/llm03_supply_chain/behavioral_regression.json"
-  ]
+  "dataset": "Example Support Tickets Demo Set",
+  "question": "Confirm whether the fake ticket corpus was generated for training use and contains no real customer data.",
+  "owner": "Fake Data Steward",
+  "ticket": "TRAINING-LLM03-303",
+  "next_step": "Keep the gate in review-required status until provenance is documented."
 }

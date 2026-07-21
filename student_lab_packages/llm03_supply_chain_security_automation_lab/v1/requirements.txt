@@ -1,6 +1,9 @@
 # Python 3.10+ is required.
 #
-# The LLM01/LLM02 mock, Ollama, and OpenAI HTTP adapters use only the Python
-# standard library. LLM03 Tier 2 uses cryptography for maintained Ed25519
-# signature verification.
+# The LLM01/LLM02 mock adapter uses only the Python standard library. LLM03
+# offline tests use local fixtures, while live LLM03 scans/probes use the tools
+# below.
 cryptography>=42.0.0
+requests>=2.31.0
+pip-audit>=2.7.0
+pip-licenses>=5.0.0

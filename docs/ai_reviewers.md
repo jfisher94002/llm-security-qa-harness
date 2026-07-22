@@ -1,10 +1,9 @@
 # AI PR Reviewers
 
-This repository is prepared for three AI review tools:
+This repository is prepared for two AI review tools:
 
 - GitHub Copilot code review
 - Sourcery
-- Gemini Code Assist
 
 ## GitHub Copilot
 
@@ -28,19 +27,6 @@ Required external setup:
 1. Install or authorize the Sourcery GitHub app for `jfisher94002/llm-security-qa-harness`.
 2. Confirm the repo is linked in Sourcery.
 3. Open a new pull request to confirm Sourcery comments automatically.
-
-## Gemini Code Assist
-
-Repository-side setup completed:
-
-- `.gemini/config.yaml` enables pull-request-opened summaries and code reviews.
-- `.gemini/styleguide.md` gives review guidance for this LLM security QA repo.
-
-Required external setup:
-
-1. Set up Gemini Code Assist for GitHub for the account or repository.
-2. Confirm this repository is included in the Gemini Code Assist GitHub connection.
-3. Open a new pull request to confirm Gemini posts a summary and review.
 
 ## Expectations
 

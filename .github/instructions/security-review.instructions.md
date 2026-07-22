@@ -1,5 +1,5 @@
 ---
-applyTo: "**/*.py,**/*.json,**/*.md,config/*.yaml,.gemini/*.yaml,.sourcery.yaml"
+applyTo: "**/*.py,**/*.json,**/*.md,config/*.yaml,.sourcery.yaml"
 ---
 
 Review through an LLM security QA lens. Look for prompt-injection test coverage gaps, unsafe disclosure examples, real-looking secrets, accidental dependence on real API credentials, nondeterministic default behavior, and report formats that make failures hard to audit.

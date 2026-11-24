@@ -1,0 +1,286 @@
+{
+  "approved": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "read": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "missing": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "v1": {
+    "display_label": "EXPECTED_FAIL",
+    "exit_code": 1
+  },
+  "binding": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "v2": {
+    "display_label": "EXPECTED_FAIL",
+    "exit_code": 1
+  },
+  "retry": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "v3": {
+    "display_label": "EXPECTED_FAIL",
+    "exit_code": 1
+  },
+  "supersession": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "revision-binding-mutation": {
+    "display_label": "EXPECTED_FAIL",
+    "exit_code": 1
+  },
+  "supersession-mutation": {
+    "display_label": "EXPECTED_FAIL",
+    "exit_code": 1
+  },
+  "count": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "v4-count": {
+    "display_label": "EXPECTED_FAIL",
+    "exit_code": 1
+  },
+  "amount": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "v4-amount": {
+    "display_label": "EXPECTED_FAIL",
+    "exit_code": 1
+  },
+  "balance": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "resume": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "fresh-proposal": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "expired": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "revoked": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "rollback-ledger": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "rollback-all": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "loop": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "tool-claim": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "missing-capture": {
+    "display_label": "ERROR",
+    "exit_code": 3
+  },
+  "missing-capture-leak": {
+    "display_label": "ERROR",
+    "exit_code": 3
+  },
+  "preboundary-error": {
+    "display_label": "ERROR",
+    "exit_code": 3
+  },
+  "positive-error": {
+    "display_label": "UNEXPECTED_FAIL",
+    "exit_code": 1
+  },
+  "receipt-integrity": {
+    "display_label": "ERROR",
+    "exit_code": 3
+  },
+  "schema-dispatcher-approval": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "schema-direct-approval": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "schema-dispatcher-approval_ref": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "schema-direct-approval_ref": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "schema-dispatcher-recipient": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "schema-direct-recipient": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "schema-dispatcher-actor": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "schema-direct-actor": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "schema-dispatcher-tenant": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "schema-direct-tenant": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "schema-dispatcher-task_id": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "schema-direct-task_id": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "schema-dispatcher-idempotency_key": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "schema-direct-idempotency_key": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "access-actor": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "receipt-access-actor": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "access-tenant": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "receipt-access-tenant": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "access-task": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "receipt-access-task": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "access-order": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "receipt-access-order": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "access-operation": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "receipt-access-operation": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "precedence-binding_unusable": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "precedence-unusable_consumed": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "precedence-consumed_expired": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "precedence-expired_revoked": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "precedence-count_amount": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "precedence-amount_balance": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "precedence-balance": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "retired-unapproved": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "order-access-get_order-tenant-direct": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "order-access-get_order-tenant-dispatcher": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "order-access-get_order-order-direct": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "order-access-get_order-order-dispatcher": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "order-access-get_order-operation-direct": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "order-access-propose_refund-tenant-direct": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "order-access-propose_refund-tenant-dispatcher": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "order-access-propose_refund-order-direct": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "order-access-propose_refund-order-dispatcher": {
+    "display_label": "PASS",
+    "exit_code": 0
+  },
+  "order-access-propose_refund-operation-direct": {
+    "display_label": "PASS",
+    "exit_code": 0
+  }
+}

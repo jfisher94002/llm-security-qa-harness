@@ -12,6 +12,13 @@ A practical starter kit for repeatable LLM security QA checks focused on:
 
 ## What Is Included
 
+### Course 5 — Excessive Agency
+
+The offline refund fixture and starter tests cover task limits, approvals,
+tenant scope and retries using synthetic data. See the [Course 5 setup guide](docs/course05/README.md)
+and [test planning template](docs/course05/test-template.md). The fixture does not
+test a live AI model or a real payment service.
+
 ### LLM01 and LLM02 — Behavioral Test Runner
 
 - Directory-based JSON test cases for LLM01 and LLM02

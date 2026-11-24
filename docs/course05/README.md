@@ -8,11 +8,10 @@ database with synthetic data. No AI model or payment service is used.
 ## Run the student examples
 
 Use Python 3.10 or later. The Course 5 tests were validated on Python 3.12
-and 3.13 in Linux. This draft uses a review branch until the pull request is
-merged. From a terminal, clone that branch and run the six tests:
+and 3.13 in Linux. From a terminal, clone the repository and run the six tests:
 
 ```sh
-git clone --branch course05-excessive-agency-draft https://github.com/jfisher94002/llm-security-qa-harness.git
+git clone https://github.com/jfisher94002/llm-security-qa-harness.git
 cd llm-security-qa-harness
 python3 -m unittest discover -s tests -p 'test_course05_student_examples.py' -v
 ```

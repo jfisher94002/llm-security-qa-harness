@@ -21,6 +21,10 @@ cross-tenant test checks the denial, recorded access decision and delivered
 content. The catalog test checks the offered tools for a restricted task. It
 only establishes what this fixture offers, not what every feature needs.
 
+Use [the test planning template](test-template.md) and its worked draft-only
+example to design a new case before writing assertions. The worked example is an
+illustration, not a captured test result.
+
 For the full imported lab test suite and fixture verification:
 
 ```sh
